@@ -286,8 +286,18 @@ int mca_pml_base_select(bool enable_progress_threads,
         opal_progress_register(mca_pml.pml_progress);
     }
 
-    /* register winner in the modex */
-    if (modex_reqd && 0 == OMPI_PROC_MY_NAME->vpid) {
+    /* Register winner in the modex.
+     * This registers the pml on local rank 0 for each node.
+     * If other process want to verify the pml being used at add_procs() time,
+     * they can do so locally via mca_pml_base_pml_check_selected()
+     * on this rank.
+     */
+    if (modex_reqd && 0 == opal_process_info.my_local_rank) {
+        opal_output_verbose(10, ompi_pml_base_framework.framework_output,
+                            "local rank %d world rank %d setting the pml version: %s",
+                            opal_process_info.my_local_rank, OMPI_PROC_MY_NAME->vpid,
+                            best_component->pmlm_version.mca_component_name);
+
         mca_pml_base_pml_selected(best_component->pmlm_version.mca_component_name);
     }
 
@@ -335,7 +345,7 @@ mca_pml_base_pml_check_selected(const char *my_pml,
     }
 
     /* if we are rank=0, then we can also assume success */
-    if (0 == OMPI_PROC_MY_NAME->vpid) {
+    if (0 == opal_process_info.my_local_rank) {
         opal_output_verbose( 10, ompi_pml_base_framework.framework_output,
                             "check:select: rank=0");
         return OMPI_SUCCESS;
@@ -363,8 +373,8 @@ mca_pml_base_pml_check_selected(const char *my_pml,
     }
 
     opal_output_verbose( 10, ompi_pml_base_framework.framework_output,
-                        "check:select: checking my pml %s against rank=0 pml %s",
-                        my_pml, remote_pml);
+                        "check:select: checking my pml %s against rank=%s, pml %s",
+                         my_pml, OMPI_NAME_PRINT(&procs[0]->super.proc_name), remote_pml);
 
     /* if that module doesn't match my own, return an error */
     if ((size != strlen(my_pml) + 1) ||
