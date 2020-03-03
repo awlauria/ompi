@@ -62,12 +62,18 @@ static int vader_add_procs(struct mca_btl_base_module_t* btl,
                            struct mca_btl_base_endpoint_t** peers,
                            struct opal_bitmap_t* reachability);
 
+static int vader_add_proc(struct mca_btl_base_module_t* btl,
+                          struct opal_proc_t *procs,
+                          struct mca_btl_base_endpoint_t** peers,
+                          struct opal_bitmap_t* reachability);
+
 static int vader_ft_event (int state);
 
 mca_btl_vader_t mca_btl_vader = {
     {
         &mca_btl_vader_component.super,
         .btl_add_procs = vader_add_procs,
+        .btl_add_proc = vader_add_proc,
         .btl_del_procs = vader_del_procs,
         .btl_finalize = vader_finalize,
         .btl_alloc = mca_btl_vader_alloc,
@@ -301,6 +307,64 @@ static int fini_vader_endpoint (struct mca_btl_base_endpoint_t *ep)
     return OPAL_SUCCESS;
 }
 
+static int vader_add_proc (struct mca_btl_base_module_t* btl,
+                            struct opal_proc_t *proc,
+                            struct mca_btl_base_endpoint_t **peers,
+                            opal_bitmap_t *reachability)
+{
+    mca_btl_vader_component_t *component = &mca_btl_vader_component;
+    mca_btl_vader_t *vader_btl = (mca_btl_vader_t *) btl;
+    const opal_proc_t *my_proc;
+    int rc = OPAL_SUCCESS;
+
+    /* initializion */
+
+    /* get pointer to my proc structure */
+    if (NULL == (my_proc = opal_proc_local_get())) {
+        return OPAL_ERR_OUT_OF_RESOURCE;
+    }
+
+    /* jump out if there's not someone we can talk to */
+    if (1 > MCA_BTL_VADER_NUM_LOCAL_PEERS) {
+        return OPAL_SUCCESS;
+    }
+
+    /* make sure that my local rank has been defined */
+    if (0 > MCA_BTL_VADER_LOCAL_RANK) {
+        return OPAL_ERROR;
+    }
+
+    if (!vader_btl->btl_inited) {
+        rc = vader_btl_first_time_init (vader_btl, 1 + MCA_BTL_VADER_NUM_LOCAL_PEERS);
+        if (rc != OPAL_SUCCESS) {
+            return rc;
+        }
+    }
+    /* check to see if this proc can be reached via shmem (i.e.,
+        if they're on my local host and in my job) */
+    if (proc->proc_name.jobid != my_proc->proc_name.jobid ||
+        !OPAL_PROC_ON_LOCAL_NODE(proc->proc_flags)) {
+        peers[0] = NULL;
+        return rc;
+    }
+
+    int rank = opal_atomic_fetch_add_32(&component -> local_rank, 1);
+    if (my_proc != proc && NULL != reachability) {
+        /* add this proc to shared memory accessibility list */
+        rc = opal_bitmap_set_bit (reachability, rank);
+        if(OPAL_SUCCESS != rc) {
+            return rc;
+        }
+    }
+
+    /* setup endpoint */
+           
+    peers[0] = component->endpoints + rank;
+    rc = init_vader_endpoint (peers[0], proc, rank);
+
+
+        return rc;
+}
 /**
  * PML->BTL notification of change in the process list.
  * PML->BTL Notification that a receive fragment has been matched.
@@ -314,7 +378,6 @@ static int fini_vader_endpoint (struct mca_btl_base_endpoint_t *ep)
  * @return     OPAL_SUCCESS or error status on failure.
  *
  */
-
 static int vader_add_procs (struct mca_btl_base_module_t* btl,
                             size_t nprocs, struct opal_proc_t **procs,
                             struct mca_btl_base_endpoint_t **peers,
@@ -349,11 +412,7 @@ static int vader_add_procs (struct mca_btl_base_module_t* btl,
         }
     }
 
-    static int32_t local_rank = 0;
-
-    bool using_threads = opal_using_threads();
-
-    for (int32_t proc = 0; proc < (int32_t) nprocs; ++proc) {
+    for (int32_t proc = 0, local_rank = 0; proc < (int32_t) nprocs; ++proc) {
         /* check to see if this proc can be reached via shmem (i.e.,
            if they're on my local host and in my job) */
         if (procs[proc]->proc_name.jobid != my_proc->proc_name.jobid ||
@@ -371,17 +430,8 @@ static int vader_add_procs (struct mca_btl_base_module_t* btl,
         }
 
         /* setup endpoint */
-        int rank = local_rank;
-        if(OPAL_UNLIKELY(using_threads)) {
-          rank = opal_atomic_fetch_add_32(&local_rank, 1);
-        }
-           
-        peers[proc] = component->endpoints + rank;
-        rc = init_vader_endpoint (peers[proc], procs[proc], rank);
-        if(OPAL_LIKELY(false == using_threads)) {
-          local_rank++;
-        }
-
+        peers[proc] = component->endpoints + local_rank;
+        rc = init_vader_endpoint (peers[proc], procs[proc], local_rank++);
         if (OPAL_SUCCESS != rc) {
             break;
         }

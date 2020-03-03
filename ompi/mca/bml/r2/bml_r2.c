@@ -403,7 +403,12 @@ static int mca_bml_r2_add_proc (struct ompi_proc_t *proc)
          * and can return addressing information for each proc
          * that is passed back to the r2 on data transfer calls
          */
-        rc = btl->btl_add_procs (btl, 1, (opal_proc_t **) &proc, &btl_endpoint, NULL);
+        if(!btl -> btl_add_proc) {
+            rc = btl->btl_add_procs (btl, 1, (opal_proc_t **) &proc, &btl_endpoint, NULL);
+        }
+        else {
+	    rc = btl->btl_add_proc (btl, (opal_proc_t *) proc, &btl_endpoint, NULL);
+        }
         if (OMPI_SUCCESS != rc || NULL == btl_endpoint) {
             /* This BTL has troubles adding the nodes. Let's continue maybe some other BTL
              * can take care of this task. */

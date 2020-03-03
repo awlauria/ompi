@@ -237,6 +237,8 @@ static int mca_btl_vader_component_register (void)
                                            &mca_btl_vader_component.knem_dma_min);
 #endif
 
+    mca_btl_vader_component.local_rank = 0;
+
     mca_btl_vader.super.btl_exclusivity               = MCA_BTL_EXCLUSIVITY_HIGH;
 
     if (MCA_BTL_VADER_XPMEM == mca_btl_vader_component.single_copy_mechanism) {

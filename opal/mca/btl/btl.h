@@ -682,6 +682,13 @@ typedef int (*mca_btl_base_module_add_procs_fn_t)(
     struct opal_bitmap_t* reachable
 );
 
+typedef int (*mca_btl_base_module_add_proc_fn_t)(
+    struct mca_btl_base_module_t* btl,
+    struct opal_proc_t* procs,
+    struct mca_btl_base_endpoint_t** endpoints,
+    struct opal_bitmap_t* reachable
+);
+
 /**
  * Notification of change to the process list.
  *
@@ -1214,6 +1221,7 @@ struct mca_btl_base_module_t {
 
     /* BTL function table */
     mca_btl_base_module_add_procs_fn_t      btl_add_procs;
+    mca_btl_base_module_add_proc_fn_t      btl_add_proc;
     mca_btl_base_module_del_procs_fn_t      btl_del_procs;
     mca_btl_base_module_register_fn_t       btl_register;
     mca_btl_base_module_finalize_fn_t       btl_finalize;
