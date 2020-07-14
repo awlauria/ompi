@@ -7,6 +7,7 @@
  * Copyright (c) 2011      NVIDIA Corporation.  All rights reserved.
  * Copyright (c) 2017-2018 Research Organization for Information Science
  *                         and Technology (RIST).  All rights reserved.
+ * Copyright (c) 2020      IBM Corporation.  All rights reserved.
  * $COPYRIGHT$
  *
  * Additional copyrights may follow
@@ -18,6 +19,7 @@
 #define OPAL_DATATYPE_UNPACK_H_HAS_BEEN_INCLUDED
 
 #include "opal_config.h"
+#include "opal/datatype/opal_datatype_pack_unpack_predefined.h"
 
 #if !defined(CHECKSUM) && OPAL_CUDA_SUPPORT
 /* Make use of existing macro to do CUDA style memcpy */
@@ -89,7 +91,8 @@ unpack_predefined_data( opal_convertor_t* CONVERTOR,
                         size_t* SPACE )
 {
     const ddt_elem_desc_t* _elem = &((ELEM)->elem);
-    size_t blocklen_bytes = opal_datatype_basicDatatypes[_elem->common.type]->size;
+    const opal_datatype_t *dtype = opal_datatype_basicDatatypes[_elem->common.type];
+    size_t blocklen_bytes = dtype->size;
     size_t cando_count = (*COUNT), do_now_bytes;
     unsigned char* _memory = (*memory) + _elem->disp;
     unsigned char* _packed = *packed;
@@ -103,8 +106,11 @@ unpack_predefined_data( opal_convertor_t* CONVERTOR,
     /* premptively update the number of COUNT we will return. */
     *(COUNT) -= cando_count;
 
-    if( 1 == _elem->blocklen ) {  /* Do as many full blocklen as possible */
-        for(; cando_count > 0; cando_count--) {
+    if( _elem->blocklen < 9 ) {
+      if(OPAL_UNLIKELY(1 == opal_datatype_unpack_predefined_element(&_packed, &_memory, cando_count, _elem->extent / dtype -> size, _elem->blocklen, dtype->id))) {
+        /* Looks like an unsupported datatype, use existing memcpy() methods. */
+        if( 1 == _elem->blocklen ) {  /* Do as many full blocklen as possible */
+          for(; cando_count > 0; cando_count--) {
             OPAL_DATATYPE_SAFEGUARD_POINTER( _memory, blocklen_bytes, (CONVERTOR)->pBaseBuf,
                                              (CONVERTOR)->pDesc, (CONVERTOR)->count );
             DO_DEBUG( opal_output( 0, "unpack memcpy( %p, %p, %lu ) => space %lu [blen = 1]\n",
@@ -112,9 +118,16 @@ unpack_predefined_data( opal_convertor_t* CONVERTOR,
             MEMCPY_CSUM( _memory, _packed, blocklen_bytes, (CONVERTOR) );
             _packed     += blocklen_bytes;
             _memory     += _elem->extent;
+          }
         }
-        goto update_and_return;
+        else {
+          goto main_unpack_path;
+        }
+      }
+      goto update_and_return;
     }
+
+    main_unpack_path:
 
     if( (1 < _elem->count) && (_elem->blocklen <= cando_count) ) {
         blocklen_bytes *= _elem->blocklen;
