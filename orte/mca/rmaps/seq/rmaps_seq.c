@@ -237,95 +237,26 @@ static int orte_rmaps_seq_map(orte_job_t *jdata)
             continue;
         }
 
-        /* dash-host trumps hostfile */
-        if (orte_get_attribute(&app->attributes, ORTE_APP_DASH_HOST, (void**)&hosts, OPAL_STRING)) {
-            opal_output_verbose(5, orte_rmaps_base_framework.framework_output,
-                                "mca:rmaps:seq: using dash-host nodes on app %s", app->app);
-            OBJ_CONSTRUCT(&node_list, opal_list_t);
-            /* dash host entries cannot specify cpusets, so used the std function to retrieve the list */
-            if (ORTE_SUCCESS != (rc = orte_util_get_ordered_dash_host_list(&node_list, hosts))) {
-                ORTE_ERROR_LOG(rc);
-                free(hosts);
-                goto error;
-            }
-            free(hosts);
-            /* transfer the list to a seq_node_t list */
-            OBJ_CONSTRUCT(&sq_list, opal_list_t);
-            while (NULL != (nd = (orte_node_t*)opal_list_remove_first(&node_list))) {
-                sq = OBJ_NEW(seq_node_t);
-                sq->hostname = strdup(nd->name);
-                opal_list_append(&sq_list, &sq->super);
-                OBJ_RELEASE(nd);
-            }
-            OBJ_DESTRUCT(&node_list);
-            seq_list = &sq_list;
-        } else if (orte_get_attribute(&app->attributes, ORTE_APP_HOSTFILE, (void**)&hosts, OPAL_STRING)) {
-            char *hstname;
-            if (NULL == hosts) {
-                rc = ORTE_ERR_NOT_FOUND;
-                goto error;
-            }
-            opal_output_verbose(5, orte_rmaps_base_framework.framework_output,
-                                "mca:rmaps:seq: using hostfile %s nodes on app %s", hosts, app->app);
-            OBJ_CONSTRUCT(&sq_list, opal_list_t);
-            /* open the file */
-            fp = fopen(hosts, "r");
-            if (NULL == fp) {
-                ORTE_ERROR_LOG(ORTE_ERR_NOT_FOUND);
-                rc = ORTE_ERR_NOT_FOUND;
-                OBJ_DESTRUCT(&sq_list);
-                goto error;
-            }
-            while (NULL != (hstname = orte_getline(fp))) {
-                if (0 == strlen(hstname)) {
-                    free(hstname);
-                    /* blank line - ignore */
-                    continue;
-                }
-                if( '#' == hstname[0] ) {
-                    free(hstname);
-                    /* Comment line - ignore */
-                    continue;
-                }
-                sq = OBJ_NEW(seq_node_t);
-                if (NULL != (sep = strchr(hstname, ' '))) {
-                    *sep = '\0';
-                    sep++;
-                    /* remove any trailing space */
-                    eptr = sep + strlen(sep) - 1;
-                    while (eptr > sep && isspace(*eptr)) {
-                        eptr--;
-                    }
-                    *(eptr+1) = 0;
-                    sq->cpuset = strdup(sep);
-                }
-
-                // Strip off the FQDN if present, ignore IP addresses
-                if( !orte_keep_fqdn_hostnames && !opal_net_isaddr(hstname) ) {
-                    char *ptr;
-                    if (NULL != (ptr = strchr(hstname, '.'))) {
-                        (*ptr) = '\0';
-                    }
-                }
-
-                sq->hostname = hstname;
-                opal_list_append(&sq_list, &sq->super);
-            }
-            fclose(fp);
-            free(hosts);
-            seq_list = &sq_list;
-        } else if (0 < opal_list_get_size(&default_seq_list)) {
-            opal_output_verbose(5, orte_rmaps_base_framework.framework_output,
-                                "mca:rmaps:seq: using default hostfile nodes on app %s", app->app);
-            seq_list = &default_seq_list;
-        } else {
+        map = jdata -> map;
+        OBJ_CONSTRUCT(&node_list, opal_list_t);
+        if(OPAL_SUCCESS != orte_rmaps_base_get_target_nodes(&node_list, &num_nodes,
+                                     app, map->mapping,
+                                     false, false)) {
             /* can't do anything - no nodes available! */
             orte_show_help("help-orte-rmaps-base.txt",
                            "orte-rmaps-base:no-available-resources",
                            true);
             return ORTE_ERR_SILENT;
         }
-
+        OBJ_CONSTRUCT(&sq_list, opal_list_t);
+        while (NULL != (nd = (orte_node_t*)opal_list_remove_first(&node_list))) {
+          sq = OBJ_NEW(seq_node_t);
+          sq->hostname = strdup(nd->name);
+          opal_list_append(&sq_list, &sq->super);
+          OBJ_RELEASE(nd);
+        }
+        OBJ_DESTRUCT(&node_list);
+        seq_list = &sq_list;
         /* check for nolocal and remove the head node, if required */
         if (map->mapping & ORTE_MAPPING_NO_USE_LOCAL) {
             for (item  = opal_list_get_first(seq_list);

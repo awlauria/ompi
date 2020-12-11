@@ -310,6 +310,7 @@ int orte_rmaps_base_get_target_nodes(opal_list_t *allocated_nodes, orte_std_cntr
      * this point either has the HNP node or nothing, and the HNP
      * node obviously has a daemon on it (us!)
      */
+#if 0
     if (0 == opal_list_get_size(allocated_nodes)) {
         /* the list is empty - if the HNP is allocated, then add it */
         if (orte_hnp_is_allocated) {
@@ -324,9 +325,11 @@ int orte_rmaps_base_get_target_nodes(opal_list_t *allocated_nodes, orte_std_cntr
             nd = NULL;
         }
     } else {
-        nd = (orte_node_t*)opal_list_get_last(allocated_nodes);
     }
-    for (i=1; i < orte_node_pool->size; i++) {
+#endif
+        //nd = (orte_node_t*)opal_list_get_last(allocated_nodes);
+    nd = NULL;
+    for (i=0; i < orte_node_pool->size; i++) {
         if (NULL != (node = (orte_node_t*)opal_pointer_array_get_item(orte_node_pool, i))) {
             /* ignore nodes that are non-usable */
             if (ORTE_FLAG_TEST(node, ORTE_NODE_NON_USABLE)) {
@@ -387,7 +390,7 @@ int orte_rmaps_base_get_target_nodes(opal_list_t *allocated_nodes, orte_std_cntr
                     nd = (orte_node_t*)opal_list_get_prev(&nd->super);
                 }
                 item = opal_list_get_next(&nd->super);
-                if (item == opal_list_get_end(allocated_nodes)) {
+                if ((0 == opal_list_get_size(allocated_nodes)) || item == opal_list_get_end(allocated_nodes)) {
                     /* we are at the end - just append */
                     opal_list_append(allocated_nodes, &node->super);
                 } else {
