@@ -25,7 +25,7 @@ dnl
 AC_DEFUN([OMPI_FORTRAN_FIND_EXT_SYMBOL_CONVENTION], [
     AC_REQUIRE([AC_PROG_NM])
     AC_REQUIRE([AC_PROG_GREP])
-    OPAL_VAR_SCOPE_PUSH([FCFLAGS_NEW LDFLAGS_NEW FLAG])
+    OPAL_VAR_SCOPE_PUSH([FOPAL_CFLAGS_NEW LDFLAGS_NEW FLAG])
 
     # invalidate cache if result came from a run where FORTRAN was disabled
     if test "$ompi_cv_fortran_external_symbol" = "skipped" ; then
@@ -48,15 +48,15 @@ EOF
              # Try without certain optimization flags, which produce object
              # files without the required external symbols;
              # e.g. option -fast turns on -ipo on Intel Compilers 11.0
-             FCFLAGS_NEW=""
+             FOPAL_CFLAGS_NEW=""
              LDFLAGS_NEW=""
              case $FC in
                  ifort)
-                     for FLAG in $FCFLAGS ; do
+                     for FLAG in $FOPAL_CFLAGS ; do
                          case $FLAG in
                              -fast) ;;
                              -ipo*) ;;
-                             *)     FCFLAGS_NEW="$FCFLAGS_NEW $FLAG" ;;
+                             *)     FOPAL_CFLAGS_NEW="$FOPAL_CFLAGS_NEW $FLAG" ;;
                          esac
                      done
                      for FLAG in $LDFLAGS ; do
@@ -66,16 +66,16 @@ EOF
                              *)     LDFLAGS_NEW="$LDFLAGS_NEW $FLAG" ;;
                          esac
                      done
-                     OPAL_LOG_MSG([Try with new FCFLAGS: $FCFLAGS_NEW   and new LDFLAGS:$LDFLAGS_NEW])
+                     OPAL_LOG_MSG([Try with new FOPAL_CFLAGS: $FOPAL_CFLAGS_NEW   and new LDFLAGS:$LDFLAGS_NEW])
                  ;;
                  *)
-                     FCFLAGS_NEW="$FCFLAGS"
+                     FOPAL_CFLAGS_NEW="$FOPAL_CFLAGS"
                      LDFLAGS_NEW="$LDFLAGS"
                  ;;
              esac
 
              happy=1
-             OPAL_LOG_COMMAND([$FC $FCFLAGS_NEW -c conftest.f $LDFLAGS_NEW $LIBS],
+             OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS_NEW -c conftest.f $LDFLAGS_NEW $LIBS],
                  [if $NM conftest.o | $GREP foo_bar__ >/dev/null 2>&1 ; then
                       ompi_cv_fortran_external_symbol="double underscore"
                   elif $NM conftest.o | $GREP foo_bar_ >/dev/null 2>&1 ; then

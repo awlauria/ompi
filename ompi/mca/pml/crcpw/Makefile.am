@@ -32,6 +32,8 @@ component_noinst = libmca_pml_crcpw.la
 component_install =
 endif
 
+libmca_pml_crcpw_la_CFLAGS = $(OPAL_CFLAGS)
+libmca_pml_crcpw_la_CPPFLAGS = $(OPAL_CPPFLAGS)
 
 mcacomponentdir = $(ompilibdir)
 mcacomponent_LTLIBRARIES = $(component_install)
@@ -42,3 +44,4 @@ mca_pml_crcpw_la_LIBADD = $(top_builddir)/ompi/lib@OMPI_LIBMPI_NAME@.la
 noinst_LTLIBRARIES = $(component_noinst)
 libmca_pml_crcpw_la_SOURCES = $(crcpw_sources)
 libmca_pml_crcpw_la_LDFLAGS = -module -avoid-version
+

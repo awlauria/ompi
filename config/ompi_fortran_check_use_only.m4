@@ -34,9 +34,9 @@ dnl                                [action if not supported])
 dnl ----------------------------------------------------
 AC_DEFUN([OMPI_FORTRAN_CHECK_USE_ONLY],[
     AS_VAR_PUSHDEF([use_only_var], [ompi_cv_fortran_use_only])
-    OPAL_VAR_SCOPE_PUSH([FCFLAGS_save])
-    FCFLAGS_save=$FCFLAGS
-    FCFLAGS="-I. $FCFLAGS"
+    OPAL_VAR_SCOPE_PUSH([FOPAL_CFLAGS_save])
+    FOPAL_CFLAGS_save=$FOPAL_CFLAGS
+    FOPAL_CFLAGS="-I. $FOPAL_CFLAGS"
 
     AC_CACHE_CHECK([if Fortran compiler supports USE...ONLY], use_only_var,
        [AC_LANG_PUSH([Fortran])
@@ -53,8 +53,8 @@ integer, bind(C, name="cmmon_") :: CMON
 INTEGER :: global_bbb
 END MODULE bbb
 EOF
-        OPAL_LOG_COMMAND([$FC $FCFLAGS -c aaa.f90],
-                         [OPAL_LOG_COMMAND([$FC $FCFLAGS -c bbb.f90],
+        OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS -c aaa.f90],
+                         [OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS -c bbb.f90],
                                            [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[PROGRAM test
 USE aaa, ONLY : global_aaa
 USE bbb, ONLY : global_bbb
@@ -69,7 +69,7 @@ END PROGRAM]])],
        ])
 
     AS_VAR_IF(use_only_var, [yes], [$1], [$2])
-    FCFLAGS=$FCFLAGS_save
+    FOPAL_CFLAGS=$FOPAL_CFLAGS_save
     OPAL_VAR_SCOPE_POP
     AS_VAR_POPDEF([use_only_var])dnl
 ])

@@ -25,6 +25,9 @@ libmca_pml_la_SOURCES =
 headers = pml.h pml_constants.h
 libmca_pml_la_SOURCES += $(headers) $(nodist_headers)
 
+libmca_pml_la_CFLAGS = $(OPAL_CFLAGS)
+libmca_pml_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 # Conditionally install the header files
 if WANT_INSTALL_HEADERS
 ompidir = $(ompiincludedir)/$(subdir)

@@ -18,3 +18,6 @@ headers += \
 
 lib@OMPI_LIBMPI_NAME@_la_SOURCES += \
 	mpiext/mpiext.c
+
+lib@OMPI_LIBMPI_NAME@_la_CFLAGS = $(OPAL_CFLAGS)
+lib@OMPI_LIBMPI_NAME@_la_CFLAGS = $(OPAL_CPPFLAGS)

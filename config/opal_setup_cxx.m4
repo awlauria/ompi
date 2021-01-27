@@ -88,15 +88,15 @@ AC_DEFUN([_OPAL_SETUP_CXX_COMPILER],[
 # VERSION file at the base of our source directory on case-
 # insensitive filesystems.
 AC_DEFUN([OPAL_CHECK_CXX_IQUOTE],[
-    OPAL_VAR_SCOPE_PUSH([opal_check_cxx_iquote_CFLAGS_save])
-    opal_check_cxx_iquote_CFLAGS_save=${CFLAGS}
-    CXXFLAGS="${CFLAGS} -iquote ."
+    OPAL_VAR_SCOPE_PUSH([opal_check_cxx_iquote_OPAL_CFLAGS_save])
+    opal_check_cxx_iquote_OPAL_CFLAGS_save=${OPAL_CFLAGS}
+    CXXFLAGS="${OPAL_CFLAGS} -iquote ."
     AC_MSG_CHECKING([for $CXX option to add a directory only to the search path for the quote form of include])
     AC_LANG_PUSH(C++)
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[])],
 		      [opal_cxx_iquote="-iquote"],
 		      [opal_cxx_iquote="-I"])
-    CXXFLAGS=${opal_check_cxx_iquote_CFLAGS_save}
+    CXXFLAGS=${opal_check_cxx_iquote_OPAL_CFLAGS_save}
     AC_LANG_POP(C++)
     OPAL_VAR_SCOPE_POP
     AC_MSG_RESULT([$opal_cxx_iquote])
@@ -109,7 +109,7 @@ AC_DEFUN([_OPAL_SETUP_CXX_COMPILER_BACKEND],[
     # Do we want code coverage
     if test "$WANT_COVERAGE" = "1"; then
         if test "$opal_cxx_vendor" = "gnu" ; then
-            AC_MSG_WARN([$OPAL_COVERAGE_FLAGS has been added to CFLAGS (--enable-coverage)])
+            AC_MSG_WARN([$OPAL_COVERAGE_FLAGS has been added to OPAL_CFLAGS (--enable-coverage)])
             WANT_DEBUG=1
             CXXFLAGS="${CXXFLAGS} $OPAL_COVERAGE_FLAGS"
             OPAL_WRAPPER_FLAGS_ADD([CXXFLAGS], [$OPAL_COVERAGE_FLAGS])
@@ -205,7 +205,7 @@ AC_DEFUN([_OPAL_SETUP_CXX_COMPILER_BACKEND],[
 **********************************************************************
 * It appears that your C++ compiler is unable to link against object
 * files created by your C compiler.  This generally indicates either
-* a conflict between the options specified in CFLAGS and CXXFLAGS
+* a conflict between the options specified in OPAL_CFLAGS and CXXFLAGS
 * or a problem with the local compiler installation.  More
 * information (including exactly what command was given to the
 * compilers and what error resulted when the commands were executed) is

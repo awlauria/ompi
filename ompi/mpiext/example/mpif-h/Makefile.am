@@ -50,4 +50,7 @@ libmpiext_example_mpifh_la_SOURCES = \
         $(ompi_HEADERS) \
         mpiext_example_progress_f.c
 libmpiext_example_mpifh_la_LDFLAGS = -module -avoid-version
+
+libmpiext_example_mpifh_la_CFLAGS = $(OPAL_CFLAGS)
+libmpiext_example_mpifh_la_CPPFLAGS = $(OPAL_CPPFLAGS)
 endif

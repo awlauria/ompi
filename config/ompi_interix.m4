@@ -47,8 +47,8 @@ AC_DEFUN([OMPI_INTERIX],[
         AC_MSG_WARN([    -lport was added to the linking flags])
         LDFLAGS="-lport $LDFLAGS"
         AC_MSG_WARN([    -D_ALL_SOURCE -D_USE_LIBPORT was added to the compilation flags])
-        CFLAGS="-D_ALL_SOURCE -D_USE_LIBPORT -I/usr/include/port $CFLAGS"
-        CPPFLAGS="-D_ALL_SOURCE -D_USE_LIBPORT -I/usr/include/port $CPPFLAGS"
+        OPAL_CFLAGS="-D_ALL_SOURCE -D_USE_LIBPORT -I/usr/include/port $OPAL_CFLAGS"
+        OPAL_CPPFLAGS="-D_ALL_SOURCE -D_USE_LIBPORT -I/usr/include/port $OPAL_CPPFLAGS"
         CXXFLAGS="-D_ALL_SOURCE -D_USE_LIBPORT -I/usr/include/port $CXXFLAGS"
 
     fi

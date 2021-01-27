@@ -3,12 +3,12 @@ dnl Usage: PAC_CONFIG_SUBDIR_ARGS(subdir,configure-args,configure-args-to-remove
 dnl
 dnl The subconfigure argument list is created based on "ac_precious_vars"
 dnl instead of explicitly use of well-known Makefile variables, like
-dnl CC/CFLAGS/CPPFLAGS..., this generalization is effective as long as
+dnl CC/OPAL_CFLAGS/OPAL_CPPFLAGS..., this generalization is effective as long as
 dnl calling configure.ac declares the needed variables to be passed down
 dnl to subconfigure as "precious" appropriately.  The precious variable
 dnl can be created in the following ways:
 dnl 1) implicit declaration through use of autoconf macros, like
-dnl    AC_PROG_CC (declares CC/CFLAGS/CPPFLAGS/LIBS/LDFLAGS), or
+dnl    AC_PROG_CC (declares CC/OPAL_CFLAGS/OPAL_CPPFLAGS/LIBS/LDFLAGS), or
 dnl    AC_PROG_F77 (declares F77/FFLAGS/FLIBS) ... 
 dnl    which are in turns invoked by other subconfigure.
 dnl    When in doubt, check "ac_precious_var" in the calling configure.

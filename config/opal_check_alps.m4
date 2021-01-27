@@ -70,7 +70,7 @@ AC_DEFUN([OPAL_CHECK_ALPS_CLE4],[
            AC_MSG_RESULT([no])])
 
     AS_IF([test "$opal_check_alps_libdir_cle4_happy" = "yes" && test "$opal_check_alps_dir_cle4_happy" = "yes"],
-          [CRAY_ALPSLLI_CFLAGS="-I$opal_check_alps_dir/include"
+          [CRAY_ALPSLLI_OPAL_CFLAGS="-I$opal_check_alps_dir/include"
            CRAY_ALPSLLI_LIBS="-L$opal_check_alps_libdir -lalpslli -lalpsutil"
            CRAY_ALPSLLI_STATIC_LIBS="-L$opal_check_alps_libdir -lalpslli -lalpsutil"
            $1],
@@ -163,7 +163,7 @@ AC_DEFUN([OPAL_CHECK_ALPS],[
 
     AS_IF([test "$opal_check_cray_alps_happy" = "yes"],
           [$1_LDFLAGS="[$]$1_LDFLAGS $CRAY_ALPSLLI_LIBS $CRAY_ALPSUTIL_LIBS"
-           $1_CPPFLAGS="[$]$1_CPPFLAGS $CRAY_ALPSLLI_CFLAGS $CRAY_ALPSUTIL_CFLAGS $CRAY_ALPS_CFLAGS $CRAY_WLM_DETECT_CFLAGS"
+           $1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $CRAY_ALPSLLI_OPAL_CFLAGS $CRAY_ALPSUTIL_OPAL_CFLAGS $CRAY_ALPS_OPAL_CFLAGS $CRAY_WLM_DETECT_OPAL_CFLAGS"
            $1_LIBS="[$]$1_LIBS $CRAY_ALPSLLI_LIBS $CRAY_ALPSUTIL_LIBS $CRAY_WLM_DETECT_LIBS"
            $1_WRAPPER_EXTRA_LDFLAGS="$CRAY_ALPSLLI_LIBS $CRAY_ALPSUTIL_LIBS $CRAY_WLM_DETECT_LIBS"
            $1_WRAPPER_EXTRA_LIBS="$CRAY_ALPSLLI_LIBS $CRAY_ALPSUTIL_LIBS $CRAY_WLM_DETECT_LIBS"

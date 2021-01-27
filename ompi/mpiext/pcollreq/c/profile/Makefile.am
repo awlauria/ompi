@@ -56,6 +56,9 @@ nodist_libpmpiext_pcollreq_c_la_SOURCES = \
         pneighbor_alltoallv_init.c \
         pneighbor_alltoallw_init.c
 
+
+nodist_libpmpiext_pcollreq_c_la_CFLAGS = $(OPAL_CFLAGS)
+nodist_libpmpiext_pcollreq_c_la_CFLAGS = $(OPAL_CPPFLAGS)
 #
 # Sym link in the sources from the real MPI directory
 #

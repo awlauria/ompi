@@ -179,7 +179,7 @@ AM_CONDITIONAL([OPAL_COMPILE_TIMING], [test "$WANT_TIMING" = "1"])
 AM_CONDITIONAL([OPAL_INSTALL_TIMING_BINARIES], [test "$WANT_TIMING" = "1" && test "$enable_binaries" != "no"])
 
 if test "$WANT_DEBUG" = "0"; then
-    CFLAGS="-DNDEBUG $CFLAGS"
+    OPAL_CFLAGS="-DNDEBUG $OPAL_CFLAGS"
     CXXFLAGS="-DNDEBUG $CXXFLAGS"
 fi
 AC_DEFINE_UNQUOTED(OPAL_ENABLE_DEBUG, $WANT_DEBUG,
@@ -477,7 +477,7 @@ AC_ARG_WITH([dst-checksum],
                      [Use an alternative checksum algorithm for messages])])
 if test "$with_dst_checksum" = "yes"; then
     AC_MSG_RESULT([yes])
-    CFLAGS="-DOPAL_CSUM_DST $CFLAGS"
+    OPAL_CFLAGS="-DOPAL_CSUM_DST $OPAL_CFLAGS"
 else
     AC_MSG_RESULT([no])
 fi

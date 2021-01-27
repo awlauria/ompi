@@ -41,23 +41,23 @@ dnl         embedded builds.  This is used by PRRTE, but should not
 dnl         be used by new code.
 dnl   * opal_pmix_mode - either external or internal.  If internal,
 dnl         --with-pmix should be ignored by other packages
-dnl   * opal_pmix_CPPFLAGS - the C Preprocessor flags necessary to
+dnl   * opal_pmix_OPAL_CPPFLAGS - the C Preprocessor flags necessary to
 dnl         run the preprocessor on a file which relies on PMIx
-dnl         headers.  This will be folded into the global CPPFLAGS,
+dnl         headers.  This will be folded into the global OPAL_CPPFLAGS,
 dnl         so most people should never need this.
 dnl   * opal_pmix_LDFLAGS - the linker flags necessary to run the
 dnl         linker on a file which relies on PMIx libraries.  This
-dnl         will be folded into the global CPPFLAGS, so most people
+dnl         will be folded into the global OPAL_CPPFLAGS, so most people
 dnl         should never need this.
 dnl   * opal_pmix_LIBS - the libraries necessary to link source which
 dnl         uses PMIx.  Cannot be added to LIBS yet, because then
 dnl         other execution tests later in configure (there are sadly
 dnl         some) would fail if the path in LDFLAGS was not added to
 dnl         LD_LIBRARY_PATH.
-dnl   * CPPFLAGS, LDFLAGS - Updated opal_pmix_CPPFLAGS and
+dnl   * OPAL_CPPFLAGS, LDFLAGS - Updated opal_pmix_OPAL_CPPFLAGS and
 dnl         opal_pmix_LDFLAGS.
 AC_DEFUN([OPAL_CONFIG_PMIX], [
-    OPAL_VAR_SCOPE_PUSH([external_pmix_happy internal_pmix_happy internal_pmix_args internal_pmix_libs internal_pmix_CPPFLAGS])
+    OPAL_VAR_SCOPE_PUSH([external_pmix_happy internal_pmix_happy internal_pmix_args internal_pmix_libs internal_pmix_OPAL_CPPFLAGS])
 
     opal_show_subtitle "Configuring PMIx"
 
@@ -71,16 +71,16 @@ AC_DEFUN([OPAL_CONFIG_PMIX], [
          # make dist always works.
 	 internal_pmix_args="--without-tests-examples --disable-pmix-binaries --disable-pmix-backward-compatibility --disable-visibility"
          internal_pmix_libs=
-         internal_pmix_CPPFLAGS=
+         internal_pmix_OPAL_CPPFLAGS=
 
          AS_IF([test "$opal_libevent_mode" = "internal"],
                [internal_pmix_args="$internal_pmix_args --with-libevent=cobuild"
-                internal_pmix_CPPFLAGS="$internal_pmix_CPPFLAGS $opal_libevent_CPPFLAGS"
+                internal_pmix_OPAL_CPPFLAGS="$internal_pmix_OPAL_CPPFLAGS $opal_libevent_OPAL_CPPFLAGS"
                 internal_pmix_libs="$internal_pmix_libs $opal_libevent_LIBS"])
 
          AS_IF([test "$opal_hwloc_mode" = "internal"],
                [internal_pmix_args="$internal_pmix_args --with-hwloc=cobuild"
-                internal_pmix_CPPFLAGS="$internal_pmix_CPPFLAGS $opal_hwloc_CPPFLAGS"
+                internal_pmix_OPAL_CPPFLAGS="$internal_pmix_OPAL_CPPFLAGS $opal_hwloc_OPAL_CPPFLAGS"
                 internal_pmix_libs="$internal_pmix_libs $opal_hwloc_LIBS"])
 
          AS_IF([test ! -z "$internal_pmix_libs"],
@@ -91,8 +91,8 @@ AC_DEFUN([OPAL_CONFIG_PMIX], [
          # picks up any user-specified compiler flags from the master
          # configure run.
          OPAL_SUBDIR_ENV_CLEAN([opal_pmix_configure])
-         AS_IF([test -n "$internal_pmix_CPPFLAGS"],
-               [OPAL_SUBDIR_ENV_APPEND([CPPFLAGS], [$internal_pmix_CPPFLAGS])])
+         AS_IF([test -n "$internal_pmix_OPAL_CPPFLAGS"],
+               [OPAL_SUBDIR_ENV_APPEND([OPAL_CPPFLAGS], [$internal_pmix_OPAL_CPPFLAGS])])
          PAC_CONFIG_SUBDIR_ARGS([3rd-party/openpmix], [$internal_pmix_args],
                            [[--with-libevent=internal], [--with-hwloc=internal],
                             [--with-libevent=external], [--with-hwloc=external],
@@ -120,7 +120,7 @@ AC_DEFUN([OPAL_CONFIG_PMIX], [
     AS_IF([test "$external_pmix_happy" = "0" -a "$internal_pmix_happy" = "0"],
           [AC_MSG_ERROR([Could not find viable pmix build.])])
 
-    AC_SUBST(opal_pmix_CPPFLAGS)
+    AC_SUBST(opal_pmix_OPAL_CPPFLAGS)
     AC_SUBST(opal_pmix_LDFLAGS)
     AC_SUBST(opal_pmix_LIBS)
 
@@ -134,9 +134,9 @@ dnl
 dnl only safe to call from OPAL_CONFIG_PMIX, assumes variables from
 dnl there are set.
 AC_DEFUN([_OPAL_CONFIG_PMIX_EXTERNAL], [
-    OPAL_VAR_SCOPE_PUSH([opal_pmix_CPPFLAGS_save opal_pmix_LDFLAGS_save opal_pmix_LIBS_save opal_pmix_external_support])
+    OPAL_VAR_SCOPE_PUSH([opal_pmix_OPAL_CPPFLAGS_save opal_pmix_LDFLAGS_save opal_pmix_LIBS_save opal_pmix_external_support])
 
-    opal_pmix_CPPFLAGS_save=$CPPFLAGS
+    opal_pmix_OPAL_CPPFLAGS_save=$OPAL_CPPFLAGS
     opal_pmix_LDFLAGS_save=$LDFLAGS
     opal_pmix_LIBS_save=$LIBS
 
@@ -161,7 +161,7 @@ AC_DEFUN([_OPAL_CONFIG_PMIX_EXTERNAL], [
                               [opal_pmix_external_support=no])
 
            # need these set for the tests below.  If things fail, will undo at the end.
-           CPPFLAGS="$opal_pmix_CPPFLAGS_save $opal_pmix_CPPFLAGS"
+           OPAL_CPPFLAGS="$opal_pmix_OPAL_CPPFLAGS_save $opal_pmix_OPAL_CPPFLAGS"
            LDFLAGS="$opal_pmix_LDFLAGS_save $opal_pmix_LDFLAGS"
            LIBS="$opal_pmix_LIBS_save $opal_pmix_LIBS"
 
@@ -182,7 +182,7 @@ AC_DEFUN([_OPAL_CONFIG_PMIX_EXTERNAL], [
 
            AS_IF([test "$opal_pmix_external_support" = "yes"],
                  [$1],
-                 [CPPFLAGS="$opal_pmix_CPPFLAGS_save"
+                 [OPAL_CPPFLAGS="$opal_pmix_OPAL_CPPFLAGS_save"
                   $2])])
 
     OPAL_VAR_SCOPE_POP
@@ -194,11 +194,11 @@ dnl Expectation is that this is called only if external fails, the
 dnl caller configured libpmix configure, and the configure script
 dnl succeeded.
 AC_DEFUN([_OPAL_CONFIG_PMIX_INTERNAL_POST], [
-    opal_pmix_CPPFLAGS="-I$OMPI_TOP_BUILDDIR/3rd-party/openpmix/include -I$OMPI_TOP_SRCDIR/3rd-party/openpmix/include"
+    opal_pmix_OPAL_CPPFLAGS="-I$OMPI_TOP_BUILDDIR/3rd-party/openpmix/include -I$OMPI_TOP_SRCDIR/3rd-party/openpmix/include"
     opal_pmix_LDFLAGS=""
     opal_pmix_LIBS="$OMPI_TOP_BUILDDIR/3rd-party/openpmix/src/libpmix.la"
 
-    CPPFLAGS="$CPPFLAGS $opal_pmix_CPPFLAGS"
+    OPAL_CPPFLAGS="$OPAL_CPPFLAGS $opal_pmix_OPAL_CPPFLAGS"
 
     opal_pmix_header="$OMPI_TOP_SRCDIR/opal/mca/pmix/pmix-3rdparty.h"
 

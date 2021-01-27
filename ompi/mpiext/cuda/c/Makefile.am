@@ -39,6 +39,8 @@ libmpiext_cuda_c_la_SOURCES = \
         $(ompi_HEADERS) \
         mpiext_cuda.c
 libmpiext_cuda_c_la_LDFLAGS = -module -avoid-version
+libmpiext_cuda_c_la_CFLAGS = $(OPAL_CFLAGS)
+libmpiext_cuda_c_la_CPPFLAGS = $(OPAL_CPPFLAGS)
 
 # Man page installation
 nodist_man_MANS = MPIX_Query_cuda_support.3

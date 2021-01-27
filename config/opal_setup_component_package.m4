@@ -34,7 +34,7 @@ dnl
 #                              11: [action-if-not-found])
 # ------------------------------------------------
 # Many components need to just check for one package, and if it's all
-# good, set themselves up with appropriate CPPFLAGS, LDFLAGS, and
+# good, set themselves up with appropriate OPAL_CPPFLAGS, LDFLAGS, and
 # LIBS.  This macro templates all of that for the common case.
 #
 # This macro does the following:
@@ -51,8 +51,8 @@ dnl
 #   the component, it's NOT a fatal error.
 # - Run OPAL_CHECK_PACKAGE (check for the specific presence of header
 #   files and/or libraries) to determine if the package is available
-# - Set and AC_SUBST <framework>_<component>_CPPFLAGS
-# - Set and AC_SUBST <framework>_<component>_CFLAGS
+# - Set and AC_SUBST <framework>_<component>_OPAL_CPPFLAGS
+# - Set and AC_SUBST <framework>_<component>_OPAL_CFLAGS
 # - Set and AC_SUBST <framework>_<component>_LDFLAGS
 # - Set and AC_SUBST <framework>_<component>_LIBS
 #
@@ -98,8 +98,8 @@ AC_DEFUN([OPAL_SETUP_COMPONENT_PACKAGE],[
                  [AC_MSG_WARN([$1:$2 requested but not found])
                   AC_MSG_ERROR([Cannot continue])])])
 
-    AC_SUBST([$1_$2_CFLAGS])
-    AC_SUBST([$1_$2_CPPFLAGS])
+    AC_SUBST([$1_$2_OPAL_CFLAGS])
+    AC_SUBST([$1_$2_OPAL_CPPFLAGS])
     AC_SUBST([$1_$2_LDFLAGS])
     AC_SUBST([$1_$2_LIBS])
 ])

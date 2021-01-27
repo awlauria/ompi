@@ -56,7 +56,7 @@ AC_DEFUN([OPAL_CHECK_CRAY_XPMEM],[
 
     AS_IF([test "$opal_check_cray_xpmem_happy" = "yes"],
           [$1_LDFLAGS="[$]$1_LDFLAGS $CRAY_XPMEM_LIBS"
-           $1_CPPFLAGS="[$]$1_CPPFLAGS $CRAY_XPMEM_CFLAGS"
+           $1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $CRAY_XPMEM_OPAL_CFLAGS"
            $1_LIBS="[$]$1_LIBS $CRAY_XPMEM_LIBS"
            AC_DEFINE_UNQUOTED([HAVE_XPMEM_H], [1],[is xpmem.h available])
            $2], [$3])
@@ -64,7 +64,7 @@ AC_DEFUN([OPAL_CHECK_CRAY_XPMEM],[
 
 # OPAL_CHECK_XPMEM(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if XPMEM support can be found.  sets prefix_{CPPFLAGS,
+# check if XPMEM support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OPAL_CHECK_XPMEM], [
@@ -105,7 +105,7 @@ AC_DEFUN([OPAL_CHECK_XPMEM], [
     fi
 
     AS_IF([test "$opal_check_xpmem_happy" = "yes"], [
-	      $1_CPPFLAGS="[$]$1_CPPFLAGS $opal_check_xpmem_CPPFLAGS"
+	      $1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $opal_check_xpmem_OPAL_CPPFLAGS"
 	      $1_LDFLAGS="[$]$1_LDFLAGS $opal_check_xpmem_LDFLAGS"
 	      $1_LIBS="[$]$1_LIBS $opal_check_xpmem_LIBS"
 	      $2], [$3])

@@ -25,7 +25,7 @@ dnl
 # ----------------------------------------------------
 AC_DEFUN([OMPI_FORTRAN_CHECK_REAL16_C_EQUIV],[
     unset happy
-    OPAL_VAR_SCOPE_PUSH([happy define_value msg CFLAGS_save])
+    OPAL_VAR_SCOPE_PUSH([happy define_value msg OPAL_CFLAGS_save])
     AS_VAR_PUSHDEF([real16_matches_c_var], [ompi_cv_real16_c_equiv])
 
     # We have to do this as a cache check for cross-compilation platforms
@@ -47,19 +47,19 @@ AC_DEFUN([OMPI_FORTRAN_CHECK_REAL16_C_EQUIV],[
                        # Intel compiler has a special type that should work
                        AS_IF([test "$opal_cv_c_compiler_vendor" = "intel"],
                              [AC_MSG_CHECKING([if intel compiler _Quad == REAL*16])
-                              CFLAGS_save="$CFLAGS"
-                              CFLAGS="$CFLAGS -Qoption,cpp,--extended_float_types"
-                              OPAL_FLAGS_UNIQ([CFLAGS])
+                              OPAL_CFLAGS_save="$OPAL_CFLAGS"
+                              OPAL_CFLAGS="$OPAL_CFLAGS -Qoption,cpp,--extended_float_types"
+                              OPAL_FLAGS_UNIQ([OPAL_CFLAGS])
                               OMPI_FORTRAN_CHECK_REAL16_EQUIV_TYPE([_Quad], [q])
                               AS_IF([test "$happy" = "yes"],
                                     [OMPI_FORTRAN_REAL16_C_TYPE="_Quad"
                                      AC_MSG_RESULT([works!])],
-                                    [CFLAGS="$CFLAGS_save"
+                                    [OPAL_CFLAGS="$OPAL_CFLAGS_save"
                                      AC_MSG_RESULT([does not work])])
                              ])
                        AS_IF([test "$opal_cv_c_compiler_vendor" = "gnu" && test "$ac_cv_type___float128" = "yes"],
                              [AC_MSG_CHECKING([if gnu compiler __float128 == REAL*16])
-                              OPAL_FLAGS_UNIQ([CFLAGS])
+                              OPAL_FLAGS_UNIQ([OPAL_CFLAGS])
                               OMPI_FORTRAN_CHECK_REAL16_EQUIV_TYPE([__float128], [q])
                               AS_IF([test "$happy" = "yes"],
                                     [OMPI_FORTRAN_REAL16_C_TYPE="__float128"
@@ -134,8 +134,8 @@ EOF
 EOF
     rm -f conftestval
     # Compile and link
-    OPAL_LOG_COMMAND([$CC $CFLAGS -I. -c conftest_c.c],
-        [OPAL_LOG_COMMAND([$FC $FCFLAGS conftest_f.f conftest_c.o -o conftest $LDFLAGS $LIBS],
+    OPAL_LOG_COMMAND([$CC $OPAL_CFLAGS -I. -c conftest_c.c],
+        [OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS conftest_f.f conftest_c.o -o conftest $LDFLAGS $LIBS],
             [happy="yes"], [happy="no"])], [happy="no"])
     AS_IF([test "$happy" = "no"],
         [AC_MSG_RESULT([Could not determine if REAL*16 bit-matches C type])],

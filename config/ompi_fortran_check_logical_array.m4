@@ -89,8 +89,8 @@ EOF
 
              # Try the compilation and run.  Can't use AC_TRY_RUN
              # because it's two module files.
-             OPAL_LOG_COMMAND([$CC $CFLAGS -I. -c conftest.c],
-                 [OPAL_LOG_COMMAND([$FC $FCFLAGS conftestf.f conftest.o -o conftest $LDFLAGS $LIBS],
+             OPAL_LOG_COMMAND([$CC $OPAL_CFLAGS -I. -c conftest.c],
+                 [OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS conftestf.f conftest.o -o conftest $LDFLAGS $LIBS],
                      [happy=1], [happy=0])],
                  [happy=0])
              if test "$happy" = "0" ; then

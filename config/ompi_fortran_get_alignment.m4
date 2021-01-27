@@ -110,8 +110,8 @@ void $ompi_ac_align_fn(char *w, char *x, char *y, char *z)
 #endif
 EOF
 
-        OPAL_LOG_COMMAND([$CC $CFLAGS -I. -c conftest.c],
-            [OPAL_LOG_COMMAND([$FC $FCFLAGS conftestf.f conftest.o -o conftest $LDFLAGS $LIBS],
+        OPAL_LOG_COMMAND([$CC $OPAL_CFLAGS -I. -c conftest.c],
+            [OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS conftestf.f conftest.o -o conftest $LDFLAGS $LIBS],
                 [happy="yes"], [happy="no"])], [happy="no"])
 
         if test "$happy" = "no" ; then

@@ -822,16 +822,16 @@ AC_MSG_ERROR([*** $2 component $3 was supposed to be direct-called, but
                       OPAL_FLAGS_APPEND_UNIQ([mca_wrapper_extra_]m4_tolower(flags), [$line])])])
     fi
 
-    # if needed, copy over WRAPPER_EXTRA_CPPFLAGS.  Since a configure script
+    # if needed, copy over WRAPPER_EXTRA_OPAL_CPPFLAGS.  Since a configure script
     # component can never be used in a STOP_AT_FIRST framework, we
     # don't have to implement the else clause in the literal check...
     AS_LITERAL_IF([$3],
-        [AS_IF([test "$$2_$3_WRAPPER_EXTRA_CPPFLAGS" != ""],
+        [AS_IF([test "$$2_$3_WRAPPER_EXTRA_OPAL_CPPFLAGS" != ""],
            [m4_if(OPAL_EVAL_ARG([MCA_$1_$2_CONFIGURE_MODE]), [STOP_AT_FIRST], [stop_at_first=1], [stop_at_first=0])
             AS_IF([test "$8" = "static" && test "$stop_at_first" = "1"],
               [AS_IF([test "$with_devel_headers" = "yes"],
-                     [OPAL_FLAGS_APPEND_UNIQ([mca_wrapper_extra_cppflags], [$$2_$3_WRAPPER_EXTRA_CPPFLAGS])])],
-              [AC_MSG_WARN([ignoring $2_$3_WRAPPER_EXTRA_CPPFLAGS ($$2_$3_WRAPPER_EXTRA_CPPFLAGS): component conditions not met])])])])
+                     [OPAL_FLAGS_APPEND_UNIQ([mca_wrapper_extra_cppflags], [$$2_$3_WRAPPER_EXTRA_OPAL_CPPFLAGS])])],
+              [AC_MSG_WARN([ignoring $2_$3_WRAPPER_EXTRA_OPAL_CPPFLAGS ($$2_$3_WRAPPER_EXTRA_OPAL_CPPFLAGS): component conditions not met])])])])
 ])
 
 

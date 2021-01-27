@@ -42,7 +42,7 @@ AC_DEFUN([OPAL_CHECK_CMA],[
 
 AC_DEFUN([OPAL_CHECK_CMA_BACKEND],
 [
-    OPAL_VAR_SCOPE_PUSH([opal_check_cma_need_defs opal_check_cma_kernel_version opal_check_cma_CFLAGS opal_check_cma_msg])
+    OPAL_VAR_SCOPE_PUSH([opal_check_cma_need_defs opal_check_cma_kernel_version opal_check_cma_OPAL_CFLAGS opal_check_cma_msg])
 
     # Some systems have process_cm_readv() in libc, which means CMA is
     # supported.  Other systems do not have process_cm_readv() in
@@ -56,9 +56,9 @@ AC_DEFUN([OPAL_CHECK_CMA_BACKEND],
                        [$opal_check_cma_need_defs],
                        [Need CMA syscalls defined])
     if test $opal_check_cma_need_defs -eq 1 ; then
-        opal_check_cma_CFLAGS=$CFLAGS
+        opal_check_cma_OPAL_CFLAGS=$OPAL_CFLAGS
         # Need some extra include paths to locate the appropriate headers
-        CFLAGS="$CFLAGS -I${srcdir} -I${srcdir}/opal/include"
+        OPAL_CFLAGS="$OPAL_CFLAGS -I${srcdir} -I${srcdir}/opal/include"
         AC_MSG_CHECKING([if internal syscall numbers for Linux CMA work])
         AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <stdlib.h>
@@ -120,7 +120,7 @@ static void do_check (pid_t pid, int *in, int *out)
 		       opal_check_cma_happy=0],
 		      [AC_MSG_RESULT([no (cross-compiling)])
 		       opal_check_cma_happy=0])
-	CFLAGS=$opal_check_cma_CFLAGS
+	OPAL_CFLAGS=$opal_check_cma_OPAL_CFLAGS
     else
         # If we didn't need the defs, then we have process_vm_readv(),
         # and CMA is happy.

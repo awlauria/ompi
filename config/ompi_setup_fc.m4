@@ -35,7 +35,7 @@ AC_DEFUN_ONCE([_OMPI_SETUP_FC_BANNER],[
 # This is REQUIREd, below.
 AC_DEFUN_ONCE([_OMPI_SETUP_FC_COMPILER],[
     OPAL_VAR_SCOPE_PUSH([ompi_fcflags_save])
-    ompi_fcflags_save="$FCFLAGS"
+    ompi_fcflags_save="$FOPAL_CFLAGS"
     # Note that AC_PROG_FC will look for *any* fortran compiler, and
     # we don't want it to find an F77-only compiler.  The AC docs
     # don't recommend using the "dialect" feature of AC_PROG_FC, so
@@ -44,7 +44,7 @@ AC_DEFUN_ONCE([_OMPI_SETUP_FC_COMPILER],[
     # default list of compilers and use it here.  This is the main
     # reason we have an OMPI-ized version of the PROG_FC macro.
     AC_PROG_FC([gfortran f95 fort xlf95 ifort ifc efc pgfortran pgf95 lf95 f90 xlf90 pgf90 epcf90 nagfor])
-    FCFLAGS="$ompi_fcflags_save"
+    FOPAL_CFLAGS="$ompi_fcflags_save"
     OPAL_VAR_SCOPE_POP
 ])
 
@@ -67,9 +67,9 @@ AC_DEFUN([OMPI_SETUP_FC],[
           [ompi_fc_happy=1])
 
     AS_IF([test $ompi_fc_happy -eq 1 && test "$WANT_DEBUG" = "1" && test "$enable_debug_symbols" != "no"],
-          [FCFLAGS="$FCFLAGS -g"
-           OPAL_FLAGS_UNIQ(FCFLAGS)
-           AC_MSG_WARN([-g has been added to FCFLAGS (--enable-debug)])
+          [FOPAL_CFLAGS="$FOPAL_CFLAGS -g"
+           OPAL_FLAGS_UNIQ(FOPAL_CFLAGS)
+           AC_MSG_WARN([-g has been added to FOPAL_CFLAGS (--enable-debug)])
           ])
 
     # Make sure the compiler actually works, if not cross-compiling.
@@ -121,11 +121,11 @@ AC_DEFUN([OMPI_SETUP_FC],[
     case "$fc_version" in
     *Absoft*)
         AC_MSG_RESULT([-Z790])
-        FCFLAGS="$FCFLAGS -Z790"
+        FOPAL_CFLAGS="$FOPAL_CFLAGS -Z790"
         ;;
     *NAG*)
         AC_MSG_RESULT([-mismatch])
-        FCFLAGS="$FCFLAGS -mismatch"
+        FOPAL_CFLAGS="$FOPAL_CFLAGS -mismatch"
         ;;
     *)
         AC_MSG_RESULT([none])
@@ -164,7 +164,7 @@ AC_DEFUN([OMPI_SETUP_FC],[
 end program]])],
                               [LDFLAGS_save=$LDFLAGS
                                OMPI_FORTRAN_WRAPPER_FLAGS="-Wl,-flat_namespace"
-                               OPAL_WRAPPER_FLAGS_ADD([FCFLAGS], [$OMPI_FORTRAN_WRAPPER_FLAGS])],
+                               OPAL_WRAPPER_FLAGS_ADD([FOPAL_CFLAGS], [$OMPI_FORTRAN_WRAPPER_FLAGS])],
                               [OMPI_FORTRAN_WRAPPER_FLAGS=none])
                AC_LANG_POP([Fortran])
                LDFLAGS=$LDFLAGS_save
@@ -189,14 +189,14 @@ It appears that your Fortran compiler is unable to link against
 object files created by your C compiler.  This typically indicates
 one of a few possibilities:
 
-  - A conflict between CFLAGS and FCFLAGS
+  - A conflict between OPAL_CFLAGS and FOPAL_CFLAGS
   - A problem with your compiler installation(s)
   - Different default build options between compilers (e.g., C
     building for 32 bit and Fortran building for 64 bit)
   - Incompatible compilers
 
 Such problems can usually be solved by picking compatible compilers
-and/or CFLAGS and FCFLAGS.  More information (including exactly what
+and/or OPAL_CFLAGS and FOPAL_CFLAGS.  More information (including exactly what
 command was given to the compilers and what error resulted when the
 commands were executed) is available in the config.log file in this
 directory.
@@ -213,7 +213,7 @@ EOF
           [AC_MSG_CHECKING([to see if Fortran compiler likes the C++ exception flags])
            AS_IF([test "$OMPI_CXX_EXCEPTIONS_CXXFLAGS" = ""],
                  [AC_MSG_RESULT([skipped (no C++ exceptions flags)])],
-                 [FCFLAGS="$FCFLAGS $OMPI_CXX_EXCEPTIONS_CXXFLAGS"
+                 [FOPAL_CFLAGS="$FOPAL_CFLAGS $OMPI_CXX_EXCEPTIONS_CXXFLAGS"
                   AC_LANG_PUSH([Fortran])
                   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
 INTEGER I
@@ -239,7 +239,7 @@ I = 3]])],
     integer :: i
 end program]])],
                        [OMPI_FORTRAN_WRAPPER_FLAGS="-Wl,-commons,use_dylibs"
-                        OPAL_WRAPPER_FLAGS_ADD([FCFLAGS], [$OMPI_FORTRAN_WRAPPER_FLAGS])],
+                        OPAL_WRAPPER_FLAGS_ADD([FOPAL_CFLAGS], [$OMPI_FORTRAN_WRAPPER_FLAGS])],
                        [OMPI_FORTRAN_WRAPPER_FLAGS=none])
         AC_LANG_POP([Fortran])
         LDFLAGS=$LDFLAGS_save

@@ -54,7 +54,7 @@ AC_DEFUN([_OPAL_ATTRIBUTE_FAIL_SEARCH],[
 # regarding unused function in main file)
 #       static int usage (int * argument);
 #
-# The last argument is for specific CFLAGS, that need to be set
+# The last argument is for specific OPAL_CFLAGS, that need to be set
 # for the compiler to generate a warning on the cross-check.
 # This may need adaption for future compilers / CFLAG-settings.
 #
@@ -100,8 +100,8 @@ AC_DEFUN([_OPAL_CHECK_SPECIFIC_ATTRIBUTE], [
         if test "$opal_cv___attribute__[$1]" = "1" && test "[$3]" != "" ; then
             ac_c_werror_flag_safe=$ac_c_werror_flag
             ac_c_werror_flag="yes"
-            CFLAGS_safe=$CFLAGS
-            CFLAGS="$CFLAGS [$4]"
+            OPAL_CFLAGS_safe=$OPAL_CFLAGS
+            OPAL_CFLAGS="$OPAL_CFLAGS [$4]"
 
             AC_TRY_COMPILE([$3],
                 [
@@ -120,7 +120,7 @@ AC_DEFUN([_OPAL_CHECK_SPECIFIC_ATTRIBUTE], [
                 ])
 
             ac_c_werror_flag=$ac_c_werror_flag_safe
-            CFLAGS=$CFLAGS_safe
+            OPAL_CFLAGS=$OPAL_CFLAGS_safe
         fi
     ])
 
@@ -279,14 +279,14 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
         [],
         [])
 
-    ATTRIBUTE_CFLAGS=
+    ATTRIBUTE_OPAL_CFLAGS=
     case "$opal_c_vendor" in
         gnu)
-            ATTRIBUTE_CFLAGS="-Wall"
+            ATTRIBUTE_OPAL_CFLAGS="-Wall"
             ;;
         intel)
             # we want specifically the warning on format string conversion
-            ATTRIBUTE_CFLAGS="-we181"
+            ATTRIBUTE_OPAL_CFLAGS="-we181"
             ;;
     esac
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([format],
@@ -303,16 +303,16 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
          /* The autoconf-generated main-function is int main(), which produces a warning by itself */
          int main(void);
         ],
-        [$ATTRIBUTE_CFLAGS])
+        [$ATTRIBUTE_OPAL_CFLAGS])
 
-    ATTRIBUTE_CFLAGS=
+    ATTRIBUTE_OPAL_CFLAGS=
     case "$opal_c_vendor" in
         gnu)
-            ATTRIBUTE_CFLAGS="-Wall"
+            ATTRIBUTE_OPAL_CFLAGS="-Wall"
             ;;
         intel)
             # we want specifically the warning on format string conversion
-            ATTRIBUTE_CFLAGS="-we181"
+            ATTRIBUTE_OPAL_CFLAGS="-we181"
             ;;
     esac
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([format_funcptr],
@@ -329,7 +329,7 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
          /* The autoconf-generated main-function is int main(), which produces a warning by itself */
          int main(void);
         ],
-        [$ATTRIBUTE_CFLAGS])
+        [$ATTRIBUTE_OPAL_CFLAGS])
 
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([hot],
         [
@@ -383,14 +383,14 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
     # Ignored by intel-compiler 9.1.045 -- recognized by cross-check
     # Ignored by PGI-6.2.5 (pgCC) -- recognized by cross-check
     #
-    ATTRIBUTE_CFLAGS=
+    ATTRIBUTE_OPAL_CFLAGS=
     case "$opal_c_vendor" in
         gnu)
-            ATTRIBUTE_CFLAGS="-Wall"
+            ATTRIBUTE_OPAL_CFLAGS="-Wall"
             ;;
         intel)
             # we do not want to get ignored attributes warnings, but rather real warnings
-            ATTRIBUTE_CFLAGS="-wd1292"
+            ATTRIBUTE_OPAL_CFLAGS="-wd1292"
             ;;
     esac
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([nonnull],
@@ -409,7 +409,7 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
          /* The autoconf-generated main-function is int main(), which produces a warning by itself */
          int main(void);
         ],
-        [$ATTRIBUTE_CFLAGS])
+        [$ATTRIBUTE_OPAL_CFLAGS])
 
 
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([noreturn],
@@ -439,7 +439,7 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
          void fatal(int arg1) { fatal_exit (arg1); }
         ],
         [],
-        [$ATTRIBUTE_CFLAGS])
+        [$ATTRIBUTE_OPAL_CFLAGS])
 
 
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([packed],
@@ -467,14 +467,14 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
     # Ignored by PGI-6.2.5 (pgCC) -- recognized by output-parser and cross-check
     # Ignored by pathcc-2.2.1 -- recognized by cross-check (through grep ignore)
     #
-    ATTRIBUTE_CFLAGS=
+    ATTRIBUTE_OPAL_CFLAGS=
     case "$opal_c_vendor" in
         gnu)
-            ATTRIBUTE_CFLAGS="-Wall"
+            ATTRIBUTE_OPAL_CFLAGS="-Wall"
             ;;
         intel)
             # we do not want to get ignored attributes warnings
-            ATTRIBUTE_CFLAGS="-wd1292"
+            ATTRIBUTE_OPAL_CFLAGS="-wd1292"
             ;;
     esac
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([sentinel],
@@ -492,7 +492,7 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
          /* The autoconf-generated main-function is int main(), which produces a warning by itself */
          int main(void);
         ],
-        [$ATTRIBUTE_CFLAGS])
+        [$ATTRIBUTE_OPAL_CFLAGS])
 
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([unused],
         [
@@ -519,14 +519,14 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
     # Ignored by the intel-compiler 9.1.045 -- recognized by cross-check
     # Ignored by pathcc-2.2.1 -- recognized by cross-check (through grep ignore)
     #
-    ATTRIBUTE_CFLAGS=
+    ATTRIBUTE_OPAL_CFLAGS=
     case "$opal_c_vendor" in
         gnu)
-            ATTRIBUTE_CFLAGS="-Wall"
+            ATTRIBUTE_OPAL_CFLAGS="-Wall"
             ;;
         intel)
             # we do not want to get ignored attributes warnings
-            ATTRIBUTE_CFLAGS="-wd1292"
+            ATTRIBUTE_OPAL_CFLAGS="-wd1292"
             ;;
     esac
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([warn_unused_result],
@@ -547,7 +547,7 @@ AC_DEFUN([OPAL_CHECK_ATTRIBUTES], [
          /* The autoconf-generated main-function is int main(), which produces a warning by itself */
          int main(void);
         ],
-        [$ATTRIBUTE_CFLAGS])
+        [$ATTRIBUTE_OPAL_CFLAGS])
 
 
     _OPAL_CHECK_SPECIFIC_ATTRIBUTE([weak_alias],

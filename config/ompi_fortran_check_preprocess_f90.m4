@@ -30,13 +30,13 @@ AC_DEFUN([OMPI_FORTRAN_CHECK_PREPROCESS_F90], [
       program bogus
       end program
 EOF
-    OPAL_LOG_COMMAND([$FC $FCFLAGS -c conftest_f.F90],
+    OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS -c conftest_f.F90],
                      [AC_MSG_RESULT([yes])],
                      [AC_MSG_RESULT([no])
                       AC_MSG_CHECKING([if -fpp flag works])
-                      OPAL_LOG_COMMAND([$FC $FCFLAGS -fpp -c conftest_f.F90],
+                      OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS -fpp -c conftest_f.F90],
                                        [AC_MSG_RESULT([yes])
-                                        FCFLAGS="$FCFLAGS -fpp"],
+                                        FOPAL_CFLAGS="$FOPAL_CFLAGS -fpp"],
                                        [AC_MSG_RESULT(no)
                                         AC_MSG_ERROR([cannot preprocess Fortran files, Aborting])])])
     rm -f conftest*

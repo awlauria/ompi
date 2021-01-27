@@ -27,3 +27,6 @@ headers += \
 
 lib@OMPI_LIBMPI_NAME@_la_SOURCES += \
         interlib/interlib.c
+
+lib@OMPI_LIBMPI_NAME@_la_CFLAGS = $(OPAL_CFLAGS)
+lib@OMPI_LIBMPI_NAME@_la_CPPFLAGS = $(OPAL_CPPFLAGS)

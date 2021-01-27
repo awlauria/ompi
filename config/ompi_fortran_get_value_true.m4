@@ -102,8 +102,8 @@ EOF
              #
              # Try the compilation and run.
              #
-             OPAL_LOG_COMMAND([$CC $CFLAGS -I. -c conftest.c],
-                 [OPAL_LOG_COMMAND([$FC $FCFLAGS -o conftest conftest.o conftestf.f $LDFLAGS $LIBS],
+             OPAL_LOG_COMMAND([$CC $OPAL_CFLAGS -I. -c conftest.c],
+                 [OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS -o conftest conftest.o conftestf.f $LDFLAGS $LIBS],
                       [happy=1], [happy=0])],
                  [happy=0])
 

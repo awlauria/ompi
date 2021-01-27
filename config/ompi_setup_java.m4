@@ -29,7 +29,7 @@ dnl _OMPI_SETUP_JAVA()
 dnl ----------------
 dnl Invoked by OMPI_SETUP_JAVA only if --enable-mpi-java was specified.
 AC_DEFUN([_OMPI_SETUP_JAVA],[
-    OPAL_VAR_SCOPE_PUSH([ompi_java_bad ompi_java_found ompi_java_dir ompi_java_jnih ompi_java_PATH_save ompi_java_CPPFLAGS_save])
+    OPAL_VAR_SCOPE_PUSH([ompi_java_bad ompi_java_found ompi_java_dir ompi_java_jnih ompi_java_PATH_save ompi_java_OPAL_CPPFLAGS_save])
 
     # Check for bozo case: ensure a directory was specified
     AS_IF([test "$with_jdk_dir" = "yes" || test "$with_jdk_dir" = "no"],
@@ -164,9 +164,9 @@ AC_DEFUN([_OMPI_SETUP_JAVA],[
 
         # Look for jni.h
         AS_IF([test "$ompi_java_happy" = "yes"],
-              [ompi_java_CPPFLAGS_save=$CPPFLAGS
+              [ompi_java_OPAL_CPPFLAGS_save=$OPAL_CPPFLAGS
                # silence a stupid Mac warning
-               CPPFLAGS="$CPPFLAGS -DTARGET_RT_MAC_CFM=0"
+               OPAL_CPPFLAGS="$OPAL_CPPFLAGS -DTARGET_RT_MAC_CFM=0"
                AC_MSG_CHECKING([javac -h])
                cat > Conftest.java << EOF
 public final class Conftest {
@@ -182,32 +182,32 @@ EOF
                rm -f Conftest.java Conftest.class Conftest.h
 
                AS_IF([test -n "$with_jdk_headers" && test "$with_jdk_headers" != "yes" && test "$with_jdk_headers" != "no"],
-                     [OMPI_JDK_CPPFLAGS="-I$with_jdk_headers"
+                     [OMPI_JDK_OPAL_CPPFLAGS="-I$with_jdk_headers"
                       # Some flavors of JDK also require -I<blah>/linux.
                       # See if that's there, and if so, add a -I for that,
                       # too.  Ugh.
                       AS_IF([test -d "$with_jdk_headers/linux"],
-                            [OMPI_JDK_CPPFLAGS="$OMPI_JDK_CPPFLAGS -I$with_jdk_headers/linux"])
+                            [OMPI_JDK_OPAL_CPPFLAGS="$OMPI_JDK_OPAL_CPPFLAGS -I$with_jdk_headers/linux"])
                       # Solaris JDK also require -I<blah>/solaris.
                       # See if that's there, and if so, add a -I for that,
                       # too.  Ugh.
                       AS_IF([test -d "$with_jdk_headers/solaris"],
-                            [OMPI_JDK_CPPFLAGS="$OMPI_JDK_CPPFLAGS -I$with_jdk_headers/solaris"])
+                            [OMPI_JDK_OPAL_CPPFLAGS="$OMPI_JDK_OPAL_CPPFLAGS -I$with_jdk_headers/solaris"])
                       # Darwin JDK also require -I<blah>/darwin.
                       # See if that's there, and if so, add a -I for that,
                       # too.  Ugh.
                       AS_IF([test -d "$with_jdk_headers/darwin"],
-                            [OMPI_JDK_CPPFLAGS="$OMPI_JDK_CPPFLAGS -I$with_jdk_headers/darwin"])
+                            [OMPI_JDK_OPAL_CPPFLAGS="$OMPI_JDK_OPAL_CPPFLAGS -I$with_jdk_headers/darwin"])
 
-                      CPPFLAGS="$CPPFLAGS $OMPI_JDK_CPPFLAGS"])
+                      OPAL_CPPFLAGS="$OPAL_CPPFLAGS $OMPI_JDK_OPAL_CPPFLAGS"])
                AC_CHECK_HEADER([jni.h], [],
                                [ompi_java_happy=no])
-               CPPFLAGS=$ompi_java_CPPFLAGS_save
+               OPAL_CPPFLAGS=$ompi_java_OPAL_CPPFLAGS_save
               ])
     else
         ompi_java_happy=no
     fi
-    AC_SUBST(OMPI_JDK_CPPFLAGS)
+    AC_SUBST(OMPI_JDK_OPAL_CPPFLAGS)
 
     # Are we happy?
     AC_MSG_CHECKING([if Java support available])

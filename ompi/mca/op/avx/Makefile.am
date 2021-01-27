@@ -48,25 +48,25 @@ if MCA_BUILD_ompi_op_has_avx_support
 specialized_op_libs += liblocal_ops_avx.la
 liblocal_ops_avx_la_SOURCES = $(sources_extended)
 liblocal_ops_avx_la_CFLAGS = @MCA_BUILD_OP_AVX_FLAGS@
-liblocal_ops_avx_la_CPPFLAGS = -DGENERATE_AVX_CODE
+liblocal_ops_avx_la_CPPFLAGS = $(OPAL_CPPFLAGS) -DGENERATE_AVX_CODE
 if MCA_BUILD_ompi_op_has_sse3_support
-liblocal_ops_avx_la_CPPFLAGS += -DGENERATE_SSE3_CODE
+liblocal_ops_avx_la_CPPFLAGS += $(OPAL_CPPFLAGS) -DGENERATE_SSE3_CODE
 endif
 if MCA_BUILD_ompi_op_has_sse41_support
-liblocal_ops_avx_la_CPPFLAGS += -DGENERATE_SSE41_CODE
+liblocal_ops_avx_la_CPPFLAGS += $(OPAL_CPPFLAGS) -DGENERATE_SSE41_CODE
 endif
 endif
 if MCA_BUILD_ompi_op_has_avx2_support
 specialized_op_libs += liblocal_ops_avx2.la
 liblocal_ops_avx2_la_SOURCES = $(sources_extended)
-liblocal_ops_avx2_la_CFLAGS = @MCA_BUILD_OP_AVX2_FLAGS@
-liblocal_ops_avx2_la_CPPFLAGS = -DGENERATE_SSE3_CODE -DGENERATE_SSE41_CODE -DGENERATE_AVX_CODE -DGENERATE_AVX2_CODE
+liblocal_ops_avx2_la_CFLAGS = $(OPAL_CFLAGS) @MCA_BUILD_OP_AVX2_FLAGS@
+liblocal_ops_avx2_la_CPPFLAGS = $(OPAL_CPPFLAGS) -DGENERATE_SSE3_CODE -DGENERATE_SSE41_CODE -DGENERATE_AVX_CODE -DGENERATE_AVX2_CODE
 endif
 if MCA_BUILD_ompi_op_has_avx512_support
 specialized_op_libs += liblocal_ops_avx512.la
 liblocal_ops_avx512_la_SOURCES = $(sources_extended)
-liblocal_ops_avx512_la_CFLAGS = @MCA_BUILD_OP_AVX512_FLAGS@
-liblocal_ops_avx512_la_CPPFLAGS = -DGENERATE_SSE3_CODE -DGENERATE_SSE41_CODE -DGENERATE_AVX_CODE -DGENERATE_AVX2_CODE -DGENERATE_AVX512_CODE
+liblocal_ops_avx512_la_CFLAGS = $(OPAL_CFLAGS) @MCA_BUILD_OP_AVX512_FLAGS@
+liblocal_ops_avx512_la_CPPFLAGS = $(OPAL_CPPFLAGS) -DGENERATE_SSE3_CODE -DGENERATE_SSE41_CODE -DGENERATE_AVX_CODE -DGENERATE_AVX2_CODE -DGENERATE_AVX512_CODE
 endif
 
 component_noinst = $(specialized_op_libs)
@@ -81,13 +81,14 @@ endif
 #
 # The DSO should install itself in $(ompilibdir) (by default,
 # $prefix/lib/openmpi).
+mca_op_avx_la_CFLAGS = $(OPAL_CFLAGS)
+mca_op_avx_la_CPPFLAGS = $(OPAL_CPPFLAGS)
 
 mcacomponentdir = $(ompilibdir)
 mcacomponent_LTLIBRARIES = $(component_install)
 mca_op_avx_la_SOURCES = $(sources)
 mca_op_avx_la_LIBADD = $(specialized_op_libs)
 mca_op_avx_la_LDFLAGS = -module -avoid-version $(top_builddir)/ompi/lib@OMPI_LIBMPI_NAME@.la
-
 
 # Specific information for static builds.
 #
@@ -98,4 +99,5 @@ noinst_LTLIBRARIES = $(component_noinst)
 libmca_op_avx_la_SOURCES = $(sources)
 libmca_op_avx_la_LIBADD = $(specialized_op_libs)
 libmca_op_avx_la_LDFLAGS = -module -avoid-version
+
 

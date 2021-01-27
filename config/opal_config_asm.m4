@@ -181,7 +181,7 @@ dnl Check to see if a specific function is linkable.
 dnl
 dnl Check with:
 dnl 1. No compiler/linker flags.
-dnl 2. CFLAGS += -mcx16
+dnl 2. OPAL_CFLAGS += -mcx16
 dnl 3. LIBS += -latomic
 dnl 4. Finally, if it links ok with any of #1, #2, or #3, actually try
 dnl to run the test code (if we're not cross-compiling) and verify
@@ -205,9 +205,9 @@ dnl $3: action if any of 1, 2, or 3 succeeds
 dnl #4: action if all of 1, 2, and 3 fail
 dnl
 AC_DEFUN([OPAL_ASM_CHECK_ATOMIC_FUNC],[
-    OPAL_VAR_SCOPE_PUSH([opal_asm_check_func_happy opal_asm_check_func_CFLAGS_save opal_asm_check_func_LIBS_save])
+    OPAL_VAR_SCOPE_PUSH([opal_asm_check_func_happy opal_asm_check_func_OPAL_CFLAGS_save opal_asm_check_func_LIBS_save])
 
-    opal_asm_check_func_CFLAGS_save=$CFLAGS
+    opal_asm_check_func_OPAL_CFLAGS_save=$OPAL_CFLAGS
     opal_asm_check_func_LIBS_save=$LIBS
 
     dnl Check with no compiler/linker flags
@@ -218,15 +218,15 @@ AC_DEFUN([OPAL_ASM_CHECK_ATOMIC_FUNC],[
         [opal_asm_check_func_happy=0
          AC_MSG_RESULT([no])])
 
-    dnl If that didn't work, try again with CFLAGS+=mcx16
+    dnl If that didn't work, try again with OPAL_CFLAGS+=mcx16
     AS_IF([test $opal_asm_check_func_happy -eq 0],
         [AC_MSG_CHECKING([for $1 with -mcx16])
-         CFLAGS="$CFLAGS -mcx16"
+         OPAL_CFLAGS="$OPAL_CFLAGS -mcx16"
          AC_LINK_IFELSE([$2],
              [opal_asm_check_func_happy=1
               AC_MSG_RESULT([yes])],
              [opal_asm_check_func_happy=0
-              CFLAGS=$opal_asm_check_func_CFLAGS_save
+              OPAL_CFLAGS=$opal_asm_check_func_OPAL_CFLAGS_save
               AC_MSG_RESULT([no])])
          ])
 
@@ -254,9 +254,9 @@ AC_DEFUN([OPAL_ASM_CHECK_ATOMIC_FUNC],[
               [AC_MSG_RESULT([cannot test -- assume yes (cross compiling)])])
          ])
 
-    dnl If we were unsuccessful, restore CFLAGS/LIBS
+    dnl If we were unsuccessful, restore OPAL_CFLAGS/LIBS
     AS_IF([test $opal_asm_check_func_happy -eq 0],
-        [CFLAGS=$opal_asm_check_func_CFLAGS_save
+        [OPAL_CFLAGS=$opal_asm_check_func_OPAL_CFLAGS_save
          LIBS=$opal_asm_check_func_LIBS_save])
 
     dnl Run the user actions
@@ -272,7 +272,7 @@ AC_DEFUN([OPAL_CHECK_SYNC_BUILTIN_CSWAP_INT128], [
 
   # Do we have __sync_bool_compare_and_swap?
   # Use a special macro because we need to check with a few different
-  # CFLAGS/LIBS.
+  # OPAL_CFLAGS/LIBS.
   OPAL_ASM_CHECK_ATOMIC_FUNC([__sync_bool_compare_and_swap],
       [AC_LANG_SOURCE(OPAL_SYNC_BOOL_COMPARE_AND_SWAP_TEST_SOURCE)],
       [sync_bool_compare_and_swap_128_result=1],
@@ -286,14 +286,14 @@ AC_DEFUN([OPAL_CHECK_SYNC_BUILTIN_CSWAP_INT128], [
 ])
 
 AC_DEFUN([OPAL_CHECK_GCC_BUILTIN_CSWAP_INT128], [
-  OPAL_VAR_SCOPE_PUSH([atomic_compare_exchange_n_128_result atomic_compare_exchange_n_128_CFLAGS_save atomic_compare_exchange_n_128_LIBS_save])
+  OPAL_VAR_SCOPE_PUSH([atomic_compare_exchange_n_128_result atomic_compare_exchange_n_128_OPAL_CFLAGS_save atomic_compare_exchange_n_128_LIBS_save])
 
-  atomic_compare_exchange_n_128_CFLAGS_save=$CFLAGS
+  atomic_compare_exchange_n_128_OPAL_CFLAGS_save=$OPAL_CFLAGS
   atomic_compare_exchange_n_128_LIBS_save=$LIBS
 
   # Do we have __sync_bool_compare_and_swap?
   # Use a special macro because we need to check with a few different
-  # CFLAGS/LIBS.
+  # OPAL_CFLAGS/LIBS.
   OPAL_ASM_CHECK_ATOMIC_FUNC([__atomic_compare_exchange_n],
       [AC_LANG_SOURCE(OPAL_ATOMIC_COMPARE_EXCHANGE_N_TEST_SOURCE)],
       [atomic_compare_exchange_n_128_result=1],
@@ -306,12 +306,12 @@ AC_DEFUN([OPAL_CHECK_GCC_BUILTIN_CSWAP_INT128], [
          AC_RUN_IFELSE([AC_LANG_PROGRAM([], [if (!__atomic_always_lock_free(16, 0)) { return 1; }])],
               [AC_MSG_RESULT([yes])],
               [atomic_compare_exchange_n_128_result=0
-               # If this test fails, need to reset CFLAGS/LIBS (the
-               # above tests atomically set CFLAGS/LIBS or not; this
+               # If this test fails, need to reset OPAL_CFLAGS/LIBS (the
+               # above tests atomically set OPAL_CFLAGS/LIBS or not; this
                # test is running after the fact, so we have to undo
-               # the side-effects of setting CFLAGS/LIBS if the above
+               # the side-effects of setting OPAL_CFLAGS/LIBS if the above
                # tests passed).
-               CFLAGS=$atomic_compare_exchange_n_128_CFLAGS_save
+               OPAL_CFLAGS=$atomic_compare_exchange_n_128_OPAL_CFLAGS_save
                LIBS=$atomic_compare_exchange_n_128_LIBS_save
                AC_MSG_RESULT([no])],
               [AC_MSG_RESULT([cannot test -- assume yes (cross compiling)])])
@@ -378,14 +378,14 @@ __atomic_add_fetch(&tmp64, 1, __ATOMIC_RELAXED);],
 ])
 
 AC_DEFUN([OPAL_CHECK_C11_CSWAP_INT128], [
-  OPAL_VAR_SCOPE_PUSH([atomic_compare_exchange_result atomic_compare_exchange_CFLAGS_save atomic_compare_exchange_LIBS_save])
+  OPAL_VAR_SCOPE_PUSH([atomic_compare_exchange_result atomic_compare_exchange_OPAL_CFLAGS_save atomic_compare_exchange_LIBS_save])
 
-  atomic_compare_exchange_CFLAGS_save=$CFLAGS
+  atomic_compare_exchange_OPAL_CFLAGS_save=$OPAL_CFLAGS
   atomic_compare_exchange_LIBS_save=$LIBS
 
   # Do we have C11 atomics on 128-bit integers?
   # Use a special macro because we need to check with a few different
-  # CFLAGS/LIBS.
+  # OPAL_CFLAGS/LIBS.
   OPAL_ASM_CHECK_ATOMIC_FUNC([atomic_compare_exchange_strong_16],
       [AC_LANG_SOURCE(OPAL_ATOMIC_COMPARE_EXCHANGE_STRONG_TEST_SOURCE)],
       [atomic_compare_exchange_result=1],
@@ -398,12 +398,12 @@ AC_DEFUN([OPAL_CHECK_C11_CSWAP_INT128], [
          AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <stdatomic.h>], [_Atomic __int128_t x; if (!atomic_is_lock_free(&x)) { return 1; }])],
               [AC_MSG_RESULT([yes])],
               [atomic_compare_exchange_result=0
-               # If this test fails, need to reset CFLAGS/LIBS (the
-               # above tests atomically set CFLAGS/LIBS or not; this
+               # If this test fails, need to reset OPAL_CFLAGS/LIBS (the
+               # above tests atomically set OPAL_CFLAGS/LIBS or not; this
                # test is running after the fact, so we have to undo
-               # the side-effects of setting CFLAGS/LIBS if the above
+               # the side-effects of setting OPAL_CFLAGS/LIBS if the above
                # tests passed).
-               CFLAGS=$atomic_compare_exchange_CFLAGS_save
+               OPAL_CFLAGS=$atomic_compare_exchange_OPAL_CFLAGS_save
                LIBS=$atomic_compare_exchange_LIBS_save
                AC_MSG_RESULT([no])],
               [AC_MSG_RESULT([cannot test -- assume yes (cross compiling)])])
@@ -630,11 +630,11 @@ $opal_cv_asm_global ${sym}gsym_test_func
 ${sym}gsym_test_func${opal_cv_asm_label_suffix}
 $opal_cv_asm_endproc ${sym}gsym_test_func
             ],
-            [opal_compile="$CC $CFLAGS -I. conftest_c.c -c > conftest.cmpl 2>&1"
+            [opal_compile="$CC $OPAL_CFLAGS -I. conftest_c.c -c > conftest.cmpl 2>&1"
              if AC_TRY_EVAL(opal_compile) ; then
                 # save the warnings
                  cat conftest.cmpl >&AC_FD_CC
-                 opal_link="$CC $CFLAGS conftest_c.$OBJEXT conftest.$OBJEXT -o conftest  $LDFLAGS $LIBS > conftest.link 2>&1"
+                 opal_link="$CC $OPAL_CFLAGS conftest_c.$OBJEXT conftest.$OBJEXT -o conftest  $LDFLAGS $LIBS > conftest.link 2>&1"
                  if AC_TRY_EVAL(opal_link) ; then
                      # save the warnings
                      cat conftest.link >&AC_FD_CC
@@ -833,7 +833,7 @@ AC_DEFUN([OPAL_CHECK_ASM_GNU_STACKEXEC], [
              cat >conftest.c <<EOF
 int testfunc() {return 0; }
 EOF
-             OPAL_LOG_COMMAND([$CC $CFLAGS -c conftest.c -o conftest.$OBJEXT],
+             OPAL_LOG_COMMAND([$CC $OPAL_CFLAGS -c conftest.c -o conftest.$OBJEXT],
                  [$OBJDUMP -x conftest.$OBJEXT 2>&1 | $GREP '\.note\.GNU-stack' &> /dev/null && opal_cv_asm_gnu_stack_result=yes],
                  [OPAL_LOG_MSG([the failed program was:], 1)
                   OPAL_LOG_FILE([conftest.c])

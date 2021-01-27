@@ -723,8 +723,8 @@ EOF
                 [OPAL_FLAGS_APPEND_UNIQ([ompi_mca_wrapper_extra_]m4_tolower(flags), [$mpiext_$1_WRAPPER_EXTRA_]flags)])
         ])
 
-    AS_IF([test "$mpiext_$1_WRAPPER_EXTRA_CPPFLAGS" != ""],
-        [OPAL_FLAGS_APPEND_UNIQ([ompi_mca_wrapper_extra_cppflags], [$mpiext_$1_WRAPPER_EXTRA_CPPFLAGS])])
+    AS_IF([test "$mpiext_$1_WRAPPER_EXTRA_OPAL_CPPFLAGS" != ""],
+        [OPAL_FLAGS_APPEND_UNIQ([ompi_mca_wrapper_extra_cppflags], [$mpiext_$1_WRAPPER_EXTRA_OPAL_CPPFLAGS])])
 ])
 
 

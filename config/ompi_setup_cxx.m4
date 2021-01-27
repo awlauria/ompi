@@ -71,7 +71,7 @@ AC_DEFUN([OMPI_SETUP_CXX],[
 **********************************************************************
 * It appears that your C++ compiler is unable to link against object
 * files created by your C compiler.  This generally indicates either
-* a conflict between the options specified in CFLAGS and CXXFLAGS
+* a conflict between the options specified in OPAL_CFLAGS and CXXFLAGS
 * or a problem with the local compiler installation.  More
 * information (including exactly what command was given to the
 * compilers and what error resulted when the commands were executed) is

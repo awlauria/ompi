@@ -18,6 +18,9 @@
 # $HEADER$
 #
 
+libmca_sharedfp_la_CFLAGS = $(OPAL_CFLAGS)
+libmca_sharedfp_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 headers += \
         base/base.h
 

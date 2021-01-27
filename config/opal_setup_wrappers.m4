@@ -28,18 +28,18 @@ dnl
 # ----------------------------------------------
 # Add new_argument to the list of arguments for variable in the
 # wrapper compilers, if it's not already there.  For example:
-#   OPAL_WRAPPER_FLAGS_ADD(CFLAGS, "-pthread")
-# will add -pthread to the list of CFLAGS the wrappers use when invoked.
+#   OPAL_WRAPPER_FLAGS_ADD(OPAL_CFLAGS, "-pthread")
+# will add -pthread to the list of OPAL_CFLAGS the wrappers use when invoked.
 #
 # This macro MAY NOT be invoked from configure macros for MCA components.
 # See the comment in SETUP_WRAPPER_INIT (below) for more information.
 AC_DEFUN([OPAL_WRAPPER_FLAGS_ADD], [
     m4_ifdef([mca_component_configure_active],
         [m4_fatal([OPAL_WRAPPER_FLAGS_ADD can not be called from a component configure])])
-    m4_if([$1], [CPPFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_cppflags], [$2])],
-          [$1], [CFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_cflags], [$2])],
+    m4_if([$1], [OPAL_CPPFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_cppflags], [$2])],
+          [$1], [OPAL_CFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_cflags], [$2])],
           [$1], [CXXFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_cxxflags], [$2])],
-          [$1], [FCFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_fcflags], [$2])],
+          [$1], [FOPAL_CFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_fcflags], [$2])],
           [$1], [LDFLAGS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_ldflags], [$2])],
           [$1], [LIBS], [OPAL_FLAGS_APPEND_UNIQ([wrapper_extra_libs], [$2])],
           [m4_fatal([Unknown wrapper flag type $1])])
@@ -62,12 +62,12 @@ AC_DEFUN([OPAL_WRAPPER_FLAGS_ADD], [
 # <framework>_<component>_WRAPPER_EXTRA_{LDFLAGS, LIBS} if set and try
 # to add <framework>_<component>_{LDFLAGS, LIBS} (if not an external
 # configure) to the wrapper LDFLAGS and LIBS.  Any arguments in
-# <framework>_<component>_WRAPPER_EXTRA_CPPFLAGS are passed to the
+# <framework>_<component>_WRAPPER_EXTRA_OPAL_CPPFLAGS are passed to the
 # wrapper compilers IF AND ONLY IF the framework was a STOP_AT_FIRST
 # framework, the component is a static component, and devel headers
 # are installed.  Note that MCA components are ONLY allowed to
-# (indirectly) influence the wrapper CPPFLAGS, LDFLAGS, and LIBS.
-# That is, a component may not influence CFLAGS, CXXFLAGS, or FCFLAGS.
+# (indirectly) influence the wrapper OPAL_CPPFLAGS, LDFLAGS, and LIBS.
+# That is, a component may not influence OPAL_CFLAGS, CXXFLAGS, or FOPAL_CFLAGS.
 #
 # Notes:
 #   * Keep user flags separate as 1) they should have no influence
@@ -78,7 +78,7 @@ AC_DEFUN([OPAL_WRAPPER_FLAGS_ADD], [
 #     doing so, and we'd like to force the issue.
 AC_DEFUN([OPAL_SETUP_WRAPPER_INIT],[
     OPAL_VAR_SCOPE_PUSH([wrapper_cc_tmp])
-    # AC_PROG_CC_C99 changes CC (instead of CFLAGS) so this method
+    # AC_PROG_CC_C99 changes CC (instead of OPAL_CFLAGS) so this method
     # must be called before OPAL_SETUP_CC.
     AC_ARG_WITH([wrapper_cc],
 		[AC_HELP_STRING([--with-wrapper-cc=path],
@@ -105,13 +105,13 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_INIT],[
 
     AC_ARG_WITH([wrapper-cflags],
                 [AC_HELP_STRING([--with-wrapper-cflags],
-                                [Extra flags to add to CFLAGS when using mpicc])])
+                                [Extra flags to add to OPAL_CFLAGS when using mpicc])])
     AS_IF([test "$with_wrapper_cflags" = "yes" || test "$with_wrapper_cflags" = "no"],
           [AC_MSG_ERROR([--with-wrapper-cflags must have an argument.])])
 
     AC_ARG_WITH([wrapper-cflags-prefix],
                 [AC_HELP_STRING([--with-wrapper-cflags-prefix],
-                                [Extra flags (before user flags) to add to CFLAGS when using mpicc])])
+                                [Extra flags (before user flags) to add to OPAL_CFLAGS when using mpicc])])
     AS_IF([test "$with_wrapper_cflags_prefix" = "yes" || test "$with_wrapper_cflags_prefix" = "no"],
           [AC_MSG_ERROR([--with-wrapper-cflags-prefix must have an argument.])])
 
@@ -130,13 +130,13 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_INIT],[
     m4_ifdef([project_ompi], [
             AC_ARG_WITH([wrapper-fcflags],
                 [AC_HELP_STRING([--with-wrapper-fcflags],
-                        [Extra flags to add to FCFLAGS when using mpifort])])
+                        [Extra flags to add to FOPAL_CFLAGS when using mpifort])])
             AS_IF([test "$with_wrapper_fcflags" = "yes" || test "$with_wrapper_fcflags" = "no"],
                 [AC_MSG_ERROR([--with-wrapper-fcflags must have an argument.])])
 
             AC_ARG_WITH([wrapper-fcflags-prefix],
                 [AC_HELP_STRING([--with-wrapper-fcflags-prefix],
-                        [Extra flags (before user flags) to add to FCFLAGS when using mpifort])])
+                        [Extra flags (before user flags) to add to FOPAL_CFLAGS when using mpifort])])
             AS_IF([test "$with_wrapper_fcflags_prefix" = "yes" || test "$with_wrapper_fcflags_prefix" = "no"],
                 [AC_MSG_ERROR([--with-wrapper-fcflags-prefix must have an argument.])])])
 
@@ -333,23 +333,23 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_FINAL],[
 
     # We now have all relevant flags.  Substitute them in everywhere.
     m4_ifdef([project_opal], [
-       AC_MSG_CHECKING([for OPAL CPPFLAGS])
+       AC_MSG_CHECKING([for OPAL OPAL_CPPFLAGS])
        if test "$WANT_INSTALL_HEADERS" = "1" ; then
-           OPAL_WRAPPER_EXTRA_CPPFLAGS='-I${includedir}/openmpi'
+           OPAL_WRAPPER_EXTRA_OPAL_CPPFLAGS='-I${includedir}/openmpi'
        fi
-       OPAL_WRAPPER_EXTRA_CPPFLAGS="$OPAL_WRAPPER_EXTRA_CPPFLAGS $opal_mca_wrapper_extra_cppflags $wrapper_extra_cppflags $with_wrapper_cppflags"
-       AC_SUBST([OPAL_WRAPPER_EXTRA_CPPFLAGS])
-       AC_MSG_RESULT([$OPAL_WRAPPER_EXTRA_CPPFLAGS])
+       OPAL_WRAPPER_EXTRA_OPAL_CPPFLAGS="$OPAL_WRAPPER_EXTRA_OPAL_CPPFLAGS $opal_mca_wrapper_extra_cppflags $wrapper_extra_cppflags $with_wrapper_cppflags"
+       AC_SUBST([OPAL_WRAPPER_EXTRA_OPAL_CPPFLAGS])
+       AC_MSG_RESULT([$OPAL_WRAPPER_EXTRA_OPAL_CPPFLAGS])
 
-       AC_MSG_CHECKING([for OPAL CFLAGS])
-       OPAL_WRAPPER_EXTRA_CFLAGS="$wrapper_extra_cflags $with_wrapper_cflags"
-       AC_SUBST([OPAL_WRAPPER_EXTRA_CFLAGS])
-       AC_MSG_RESULT([$OPAL_WRAPPER_EXTRA_CFLAGS])
+       AC_MSG_CHECKING([for OPAL OPAL_CFLAGS])
+       OPAL_WRAPPER_EXTRA_OPAL_CFLAGS="$wrapper_extra_cflags $with_wrapper_cflags"
+       AC_SUBST([OPAL_WRAPPER_EXTRA_OPAL_CFLAGS])
+       AC_MSG_RESULT([$OPAL_WRAPPER_EXTRA_OPAL_CFLAGS])
 
-       AC_MSG_CHECKING([for OPAL CFLAGS_PREFIX])
-       OPAL_WRAPPER_EXTRA_CFLAGS_PREFIX="$with_wrapper_cflags_prefix"
-       AC_SUBST([OPAL_WRAPPER_EXTRA_CFLAGS_PREFIX])
-       AC_MSG_RESULT([$OPAL_WRAPPER_EXTRA_CFLAGS_PREFIX])
+       AC_MSG_CHECKING([for OPAL OPAL_CFLAGS_PREFIX])
+       OPAL_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX="$with_wrapper_cflags_prefix"
+       AC_SUBST([OPAL_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX])
+       AC_MSG_RESULT([$OPAL_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX])
 
        AC_MSG_CHECKING([for OPAL CXXFLAGS])
        OPAL_WRAPPER_EXTRA_CXXFLAGS="$wrapper_extra_cxxflags $with_wrapper_cxxflags"
@@ -384,23 +384,23 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_FINAL],[
     ])
 
     m4_ifdef([project_orte], [
-       AC_MSG_CHECKING([for ORTE CPPFLAGS])
+       AC_MSG_CHECKING([for ORTE OPAL_CPPFLAGS])
        if test "$WANT_INSTALL_HEADERS" = "1" ; then
-           ORTE_WRAPPER_EXTRA_CPPFLAGS='-I${includedir}/openmpi'
+           ORTE_WRAPPER_EXTRA_OPAL_CPPFLAGS='-I${includedir}/openmpi'
        fi
-       ORTE_WRAPPER_EXTRA_CPPFLAGS="$ORTE_WRAPPER_EXTRA_CPPFLAGS $orte_mca_wrapper_extra_cppflags $wrapper_extra_cppflags $with_wrapper_cppflags"
-       AC_SUBST([ORTE_WRAPPER_EXTRA_CPPFLAGS])
-       AC_MSG_RESULT([$ORTE_WRAPPER_EXTRA_CPPFLAGS])
+       ORTE_WRAPPER_EXTRA_OPAL_CPPFLAGS="$ORTE_WRAPPER_EXTRA_OPAL_CPPFLAGS $orte_mca_wrapper_extra_cppflags $wrapper_extra_cppflags $with_wrapper_cppflags"
+       AC_SUBST([ORTE_WRAPPER_EXTRA_OPAL_CPPFLAGS])
+       AC_MSG_RESULT([$ORTE_WRAPPER_EXTRA_OPAL_CPPFLAGS])
 
-       AC_MSG_CHECKING([for ORTE CFLAGS])
-       ORTE_WRAPPER_EXTRA_CFLAGS="$wrapper_extra_cflags $with_wrapper_cflags"
-       AC_SUBST([ORTE_WRAPPER_EXTRA_CFLAGS])
-       AC_MSG_RESULT([$ORTE_WRAPPER_EXTRA_CFLAGS])
+       AC_MSG_CHECKING([for ORTE OPAL_CFLAGS])
+       ORTE_WRAPPER_EXTRA_OPAL_CFLAGS="$wrapper_extra_cflags $with_wrapper_cflags"
+       AC_SUBST([ORTE_WRAPPER_EXTRA_OPAL_CFLAGS])
+       AC_MSG_RESULT([$ORTE_WRAPPER_EXTRA_OPAL_CFLAGS])
 
-       AC_MSG_CHECKING([for ORTE CFLAGS_PREFIX])
-       ORTE_WRAPPER_EXTRA_CFLAGS_PREFIX="$with_wrapper_cflags_prefix"
-       AC_SUBST([ORTE_WRAPPER_EXTRA_CFLAGS_PREFIX])
-       AC_MSG_RESULT([$ORTE_WRAPPER_EXTRA_CFLAGS_PREFIX])
+       AC_MSG_CHECKING([for ORTE OPAL_CFLAGS_PREFIX])
+       ORTE_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX="$with_wrapper_cflags_prefix"
+       AC_SUBST([ORTE_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX])
+       AC_MSG_RESULT([$ORTE_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX])
 
        AC_MSG_CHECKING([for ORTE LDFLAGS])
        ORTE_WRAPPER_EXTRA_LDFLAGS="$orte_mca_wrapper_extra_ldflags $wrapper_extra_ldflags $with_wrapper_ldflags"
@@ -420,10 +420,10 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_FINAL],[
 
        m4_ifdef([project_ompi], [], [
           # these are used by orte_info/ompi_info (yes, they are named poorly)
-          AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_CFLAGS, "$ORTE_WRAPPER_EXTRA_CFLAGS",
-              [Additional CFLAGS to pass through the wrapper compilers])
-          AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_CFLAGS_PREFIX, "$ORTE_WRAPPER_EXTRA_CFLAGS_PREFIX",
-              [Additional CFLAGS_PREFIX to pass through the wrapper compilers])
+          AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_OPAL_CFLAGS, "$ORTE_WRAPPER_EXTRA_OPAL_CFLAGS",
+              [Additional OPAL_CFLAGS to pass through the wrapper compilers])
+          AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX, "$ORTE_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX",
+              [Additional OPAL_CFLAGS_PREFIX to pass through the wrapper compilers])
           AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_LDFLAGS, "$ORTE_WRAPPER_EXTRA_LDFLAGS",
               [Additional LDFLAGS to pass through the wrapper compilers])
           AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_LIBS, "$ORTE_WRAPPER_EXTRA_LIBS",
@@ -432,23 +432,23 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_FINAL],[
     ])
 
     m4_ifdef([project_ompi], [
-       AC_MSG_CHECKING([for OMPI CPPFLAGS])
+       AC_MSG_CHECKING([for OMPI OPAL_CPPFLAGS])
        if test "$WANT_INSTALL_HEADERS" = "1" ; then
-           OMPI_WRAPPER_EXTRA_CPPFLAGS='-I${includedir}/openmpi'
+           OMPI_WRAPPER_EXTRA_OPAL_CPPFLAGS='-I${includedir}/openmpi'
        fi
-       OMPI_WRAPPER_EXTRA_CPPFLAGS="$OMPI_WRAPPER_EXTRA_CPPFLAGS $ompi_mca_wrapper_extra_cppflags $wrapper_extra_cppflags $with_wrapper_cppflags"
-       AC_SUBST([OMPI_WRAPPER_EXTRA_CPPFLAGS])
-       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_CPPFLAGS])
+       OMPI_WRAPPER_EXTRA_OPAL_CPPFLAGS="$OMPI_WRAPPER_EXTRA_OPAL_CPPFLAGS $ompi_mca_wrapper_extra_cppflags $wrapper_extra_cppflags $with_wrapper_cppflags"
+       AC_SUBST([OMPI_WRAPPER_EXTRA_OPAL_CPPFLAGS])
+       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_OPAL_CPPFLAGS])
 
-       AC_MSG_CHECKING([for OMPI CFLAGS])
-       OMPI_WRAPPER_EXTRA_CFLAGS="$wrapper_extra_cflags $with_wrapper_cflags"
-       AC_SUBST([OMPI_WRAPPER_EXTRA_CFLAGS])
-       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_CFLAGS])
+       AC_MSG_CHECKING([for OMPI OPAL_CFLAGS])
+       OMPI_WRAPPER_EXTRA_OPAL_CFLAGS="$wrapper_extra_cflags $with_wrapper_cflags"
+       AC_SUBST([OMPI_WRAPPER_EXTRA_OPAL_CFLAGS])
+       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_OPAL_CFLAGS])
 
-       AC_MSG_CHECKING([for OMPI CFLAGS_PREFIX])
-       OMPI_WRAPPER_EXTRA_CFLAGS_PREFIX="$with_wrapper_cflags_prefix"
-       AC_SUBST([OMPI_WRAPPER_EXTRA_CFLAGS_PREFIX])
-       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_CFLAGS_PREFIX])
+       AC_MSG_CHECKING([for OMPI OPAL_CFLAGS_PREFIX])
+       OMPI_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX="$with_wrapper_cflags_prefix"
+       AC_SUBST([OMPI_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX])
+       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX])
 
        AC_MSG_CHECKING([for OMPI CXXFLAGS])
        OMPI_WRAPPER_EXTRA_CXXFLAGS="$wrapper_extra_cxxflags $with_wrapper_cxxflags"
@@ -460,18 +460,18 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_FINAL],[
        AC_SUBST([OMPI_WRAPPER_EXTRA_CXXFLAGS_PREFIX])
        AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_CXXFLAGS_PREFIX])
 
-       AC_MSG_CHECKING([for OMPI FCFLAGS])
-       OMPI_WRAPPER_EXTRA_FCFLAGS="$wrapper_extra_fcflags $with_wrapper_fcflags"
+       AC_MSG_CHECKING([for OMPI FOPAL_CFLAGS])
+       OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS="$wrapper_extra_fcflags $with_wrapper_fcflags"
        if test "$OMPI_FC_MODULE_FLAG" != "" ; then
-           OMPI_WRAPPER_EXTRA_FCFLAGS="$OMPI_WRAPPER_EXTRA_FCFLAGS $OMPI_FC_MODULE_FLAG"'${libdir}'
+           OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS="$OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS $OMPI_FC_MODULE_FLAG"'${libdir}'
        fi
-       AC_SUBST([OMPI_WRAPPER_EXTRA_FCFLAGS])
-       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_FCFLAGS])
+       AC_SUBST([OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS])
+       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS])
 
-       AC_MSG_CHECKING([for OMPI FCFLAGS_PREFIX])
-       OMPI_WRAPPER_EXTRA_FCFLAGS_PREFIX="$with_wrapper_fcflags_prefix"
-       AC_SUBST([OMPI_WRAPPER_EXTRA_FCFLAGS_PREFIX])
-       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_FCFLAGS_PREFIX])
+       AC_MSG_CHECKING([for OMPI FOPAL_CFLAGS_PREFIX])
+       OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS_PREFIX="$with_wrapper_fcflags_prefix"
+       AC_SUBST([OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS_PREFIX])
+       AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS_PREFIX])
 
        AC_MSG_CHECKING([for OMPI LDFLAGS])
        OMPI_WRAPPER_EXTRA_LDFLAGS="$ompi_mca_wrapper_extra_ldflags $wrapper_extra_ldflags $with_wrapper_ldflags"
@@ -533,18 +533,18 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_FINAL],[
                          [chmod +x ompi/tools/wrappers/ompi_wrapper_script])
        fi
 
-       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_CFLAGS, "$OMPI_WRAPPER_EXTRA_CFLAGS",
-           [Additional CFLAGS to pass through the wrapper compilers])
-       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_CFLAGS_PREFIX, "$OMPI_WRAPPER_EXTRA_CFLAGS_PREFIX",
-           [Additional CFLAGS_PREFIX to pass through the wrapper compilers])
+       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_OPAL_CFLAGS, "$OMPI_WRAPPER_EXTRA_OPAL_CFLAGS",
+           [Additional OPAL_CFLAGS to pass through the wrapper compilers])
+       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX, "$OMPI_WRAPPER_EXTRA_OPAL_CFLAGS_PREFIX",
+           [Additional OPAL_CFLAGS_PREFIX to pass through the wrapper compilers])
        AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_CXXFLAGS, "$OMPI_WRAPPER_EXTRA_CXXFLAGS",
            [Additional CXXFLAGS to pass through the wrapper compilers])
        AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_CXXFLAGS_PREFIX, "$OMPI_WRAPPER_EXTRA_CXXFLAGS_PREFIX",
            [Additional CXXFLAGS_PREFIX to pass through the wrapper compilers])
-       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_FCFLAGS, "$OMPI_WRAPPER_EXTRA_FCFLAGS",
-           [Additional FCFLAGS to pass through the wrapper compilers])
-       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_FCFLAGS_PREFIX, "$OMPI_WRAPPER_EXTRA_FCFLAGS_PREFIX",
-           [Additional FCFLAGS to pass through the wrapper compilers])
+       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_FOPAL_CFLAGS, "$OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS",
+           [Additional FOPAL_CFLAGS to pass through the wrapper compilers])
+       AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_FOPAL_CFLAGS_PREFIX, "$OMPI_WRAPPER_EXTRA_FOPAL_CFLAGS_PREFIX",
+           [Additional FOPAL_CFLAGS to pass through the wrapper compilers])
        AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_LDFLAGS, "$OMPI_WRAPPER_EXTRA_LDFLAGS",
            [Additional LDFLAGS to pass through the wrapper compilers])
        AC_DEFINE_UNQUOTED(WRAPPER_EXTRA_LIBS, "$OMPI_WRAPPER_EXTRA_LIBS",

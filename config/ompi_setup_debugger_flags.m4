@@ -24,21 +24,21 @@ dnl
 dnl $HEADER$
 dnl
 
-dnl Check to see if specific CFLAGS work
+dnl Check to see if specific OPAL_CFLAGS work
 dnl $1: compiler flags to check
 dnl $2: Action if the flags work
 dnl $3: Action if the flags do not work
-AC_DEFUN([_OMPI_SETUP_DEBUGGER_FLAGS_TRY_CFLAGS],[
-    OPAL_VAR_SCOPE_PUSH([OMPI_SETUP_DEBUGGER_FLAGS_CFLAGS_save])
+AC_DEFUN([_OMPI_SETUP_DEBUGGER_FLAGS_TRY_OPAL_CFLAGS],[
+    OPAL_VAR_SCOPE_PUSH([OMPI_SETUP_DEBUGGER_FLAGS_OPAL_CFLAGS_save])
 
-    OMPI_SETUP_DEBUGGER_FLAGS_CFLAGS_save=$CFLAGS
+    OMPI_SETUP_DEBUGGER_FLAGS_OPAL_CFLAGS_save=$OPAL_CFLAGS
     AC_MSG_CHECKING([if $1 compiler flag works])
-    CFLAGS="$CFLAGS $1"
+    OPAL_CFLAGS="$OPAL_CFLAGS $1"
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[int i = 3;])],
         [OMPI_SETUP_DEBUGGER_FLAGS_HAPPY=yes],
         [OMPI_SETUP_DEBUGGER_FLAGS_HAPPY=no])
     AC_MSG_RESULT([$OMPI_SETUP_DEBUGGER_FLAGS_HAPPY])
-    CFLAGS=$OMPI_SETUP_DEBUGGER_FLAGS_CFLAGS_save
+    OPAL_CFLAGS=$OMPI_SETUP_DEBUGGER_FLAGS_OPAL_CFLAGS_save
 
     OPAL_VAR_SCOPE_POP
 
@@ -48,33 +48,33 @@ AC_DEFUN([_OMPI_SETUP_DEBUGGER_FLAGS_TRY_CFLAGS],[
 
 AC_DEFUN([OMPI_SETUP_DEBUGGER_FLAGS],[
     #
-    # Do a final process of the CFLAGS to make a WITHOUT_OPTFLAGS
+    # Do a final process of the OPAL_CFLAGS to make a WITHOUT_OPTFLAGS
     # version.  We need this so that we can guarantee to build the
     # debugger-sensitive files with -g and nothing else.
     #
 
-    OPAL_STRIP_OPTFLAGS($CFLAGS)
-    CFLAGS_WITHOUT_OPTFLAGS="$s_result"
+    OPAL_STRIP_OPTFLAGS($OPAL_CFLAGS)
+    OPAL_CFLAGS_WITHOUT_OPTFLAGS="$s_result"
     # Tweak the compiler flags passed to ompirun for Sun Studio SPARC
     # https://svn.open-mpi.org/trac/ompi/ticket/1448
     if test "x$opal_cv_c_compiler_vendor" = "xsun" && test -n "`echo $host | $GREP sparc`"; then
-        DEBUGGER_CFLAGS="-g -xO0"
+        DEBUGGER_OPAL_CFLAGS="-g -xO0"
     else
         # Tweak the compiler flags passed for intel
         # to stop its aggressive inlining of functions
         if test "x$opal_cv_c_compiler_vendor" = "xintel"; then
-            DEBUGGER_CFLAGS="-g -O0"
+            DEBUGGER_OPAL_CFLAGS="-g -O0"
         else
-            DEBUGGER_CFLAGS="-g"
+            DEBUGGER_OPAL_CFLAGS="-g"
         fi
     fi
-    AC_MSG_CHECKING([which of CFLAGS are ok for debugger modules])
-    AC_MSG_RESULT([$CFLAGS_WITHOUT_OPTFLAGS])
-    AC_MSG_CHECKING([for debugger extra CFLAGS])
-    AC_MSG_RESULT([$DEBUGGER_CFLAGS])
+    AC_MSG_CHECKING([which of OPAL_CFLAGS are ok for debugger modules])
+    AC_MSG_RESULT([$OPAL_CFLAGS_WITHOUT_OPTFLAGS])
+    AC_MSG_CHECKING([for debugger extra OPAL_CFLAGS])
+    AC_MSG_RESULT([$DEBUGGER_OPAL_CFLAGS])
 
-    AC_SUBST(CFLAGS_WITHOUT_OPTFLAGS)
-    AC_SUBST(DEBUGGER_CFLAGS)
+    AC_SUBST(OPAL_CFLAGS_WITHOUT_OPTFLAGS)
+    AC_SUBST(DEBUGGER_OPAL_CFLAGS)
 
     # Check for compiler specific flag to add in unwind information.
     # This is needed when attaching using MPIR to unwind back to the
@@ -82,15 +82,15 @@ AC_DEFUN([OMPI_SETUP_DEBUGGER_FLAGS],[
     # producing a stack when explicit unwind information is unavailable.
     # This is implied by -g, but we want to save space and don't need
     # full debug symbols.
-    _OMPI_SETUP_DEBUGGER_FLAGS_TRY_CFLAGS([-fasynchronous-unwind-tables],
-        [MPIR_UNWIND_CFLAGS="-fasynchronous-unwind-tables"],
-        [_OMPI_SETUP_DEBUGGER_FLAGS_TRY_CFLAGS([-Meh_frame -Mframe],
-            [MPIR_UNWIND_CFLAGS="-Meh_frame -Mframe"],
-            [MPIR_UNWIND_CFLAGS=-g])
+    _OMPI_SETUP_DEBUGGER_FLAGS_TRY_OPAL_CFLAGS([-fasynchronous-unwind-tables],
+        [MPIR_UNWIND_OPAL_CFLAGS="-fasynchronous-unwind-tables"],
+        [_OMPI_SETUP_DEBUGGER_FLAGS_TRY_OPAL_CFLAGS([-Meh_frame -Mframe],
+            [MPIR_UNWIND_OPAL_CFLAGS="-Meh_frame -Mframe"],
+            [MPIR_UNWIND_OPAL_CFLAGS=-g])
         ])
 
     AC_MSG_CHECKING([for final compiler unwind flags])
-    AC_MSG_RESULT([$MPIR_UNWIND_CFLAGS])
+    AC_MSG_RESULT([$MPIR_UNWIND_OPAL_CFLAGS])
 
-    AC_SUBST(MPIR_UNWIND_CFLAGS)
+    AC_SUBST(MPIR_UNWIND_OPAL_CFLAGS)
 ])

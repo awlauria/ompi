@@ -25,7 +25,7 @@ AC_DEFUN([OPAL_CHECK_OFFSETOF],[
                                       [[struct foo {int a, b;}; size_t offset = offsetof(struct foo, b); ]])],
                       [have_offsetof_msg="yes"], [have_offsetof_msg="no"])
     if test "$have_offsetof_msg" = "no"; then
-        CPPFLAGS="$CPPFLAGS -DNO_PGI_OFFSET"
+        OPAL_CPPFLAGS="$OPAL_CPPFLAGS -DNO_PGI_OFFSET"
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include<stddef.h>]],
                                           [[struct foo {int a, b;}; size_t offset = offsetof(struct foo, b); ]])],
                           [have_offsetof_msg="yes"], [have_offsetof_msg="no"])

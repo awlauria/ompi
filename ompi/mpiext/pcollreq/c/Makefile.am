@@ -65,6 +65,9 @@ endif
 libmpiext_pcollreq_c_la_LIBADD = \
         profile/libpmpiext_pcollreq_c.la
 
+libmpiext_pcollreq_c_la_CFLAGS = $(OPAL_CFLAGS)
+libmpiext_pcollreq_c_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 # Man page installation
 nodist_man_MANS = \
         MPIX_Allgather_init.3 \

@@ -67,6 +67,9 @@ endif
 # The DSO should install itself in $(ompilibdir) (by default,
 # $prefix/lib/openmpi).
 
+mca_op_example_la_CFLAGS = $(OPAL_CFLAGS)
+mca_op_example_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 mcacomponentdir = $(ompilibdir)
 mcacomponent_LTLIBRARIES = $(component)
 mca_op_example_la_SOURCES = $(component_sources)

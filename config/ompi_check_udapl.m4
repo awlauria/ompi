@@ -22,7 +22,7 @@ dnl
 
 # OMPI_CHECK_UDAPL(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if uDAPL support can be found.  sets prefix_{CPPFLAGS,
+# check if uDAPL support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_UDAPL],[
@@ -75,11 +75,11 @@ dnl ompi_check_package does, but only do the header check once.
 dnl Still do the lib check twice, the second time if it turns
 dnl out we need -ldapl to link (looks like udapl over GM).
 
-    ompi_check_package_$1_save_CPPFLAGS="$CPPFLAGS"
+    ompi_check_package_$1_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
     ompi_check_package_$1_save_LDFLAGS="$LDFLAGS"
     ompi_check_package_$1_save_LIBS="$LIBS"
 
-    ompi_check_package_$1_orig_CPPFLAGS="$$1_CPPFLAGS"
+    ompi_check_package_$1_orig_OPAL_CPPFLAGS="$$1_OPAL_CPPFLAGS"
     ompi_check_package_$1_orig_LDFLAGS="$$1_LDFLAGS"
     ompi_check_package_$1_orig_LIBS="$$1_LIBS"
 
@@ -107,7 +107,7 @@ dnl out we need -ldapl to link (looks like udapl over GM).
                       [ompi_check_udapl_happy="yes"],
                       [ompi_check_udapl_happy="no"])])])
 
-    CPPFLAGS="$ompi_check_package_$1_save_CPPFLAGS"
+    OPAL_CPPFLAGS="$ompi_check_package_$1_save_OPAL_CPPFLAGS"
     LDFLAGS="$ompi_check_package_$1_save_LDFLAGS"
     LIBS="$ompi_check_package_$1_save_LIBS"
 

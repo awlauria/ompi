@@ -45,7 +45,7 @@ module OMPI_MOD_FLAG
 end module OMPI_MOD_FLAG
 EOF
 
-        OPAL_LOG_COMMAND([$FC $FCFLAGS $FCFLAGS_f90 -c conftest-module.f90 $LDFLAGS $LIBS], ,
+        OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS $FOPAL_CFLAGS_f90 -c conftest-module.f90 $LDFLAGS $LIBS], ,
             [cd  ..
              rm -rf conftest.$$
              AC_MSG_RESULT([Whoops!])
@@ -67,10 +67,10 @@ EOF
         ofi_module_flag=
         for flag in $ofi_possible_flags; do
             if test "$ofi_module_flag" = ""; then
-                OPAL_LOG_COMMAND([$FC $FCFLAGS $FCFLAGS_f90 conftest.f90 ${flag}subdir $LDFLAGS $LIBS],
+                OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS $FOPAL_CFLAGS_f90 conftest.f90 ${flag}subdir $LDFLAGS $LIBS],
                         [ofi_module_flag=$flag],
 dnl try and see if we need to link in a possible object file
-                        [OPAL_LOG_COMMAND([$FC $FCFLAGS $FCFLAGS_f90 conftest.f90 subdir/conftest-module.o \
+                        [OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS $FOPAL_CFLAGS_f90 conftest.f90 subdir/conftest-module.o \
                                           ${flag}subdir $LDFLAGS $LIBS],
                                           [ofi_module_flag=$flag])])
             fi

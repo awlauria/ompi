@@ -50,8 +50,8 @@ AC_DEFUN([OPAL_CHECK_OS_FLAVORS],
 
     AS_IF([test "$opal_found_sun" = "yes"],
           [opal_have_solaris=1
-           CFLAGS="$CFLAGS -D_REENTRANT"
-           CPPFLAGS="$CPPFLAGS -D_REENTRANT"],
+           OPAL_CFLAGS="$OPAL_CFLAGS -D_REENTRANT"
+           OPAL_CPPFLAGS="$OPAL_CPPFLAGS -D_REENTRANT"],
           [opal_have_solaris=0])
     AC_DEFINE_UNQUOTED([OPAL_HAVE_SOLARIS],
                        [$opal_have_solaris],

@@ -25,7 +25,7 @@ dnl
 
 # OPAL_CHECK_PORTALS4(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if PORTALS4 support can be found.  sets prefix_{CPPFLAGS,
+# check if PORTALS4 support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OPAL_CHECK_PORTALS4],[
@@ -39,7 +39,7 @@ AC_DEFUN([OPAL_CHECK_PORTALS4],[
 				    [Search for Portals4 libraries in DIR])])
 	OPAL_CHECK_WITHDIR([portals4-libdir], [$with_portals4_libdir], [libportals.*])
 
-	ompi_check_portals4_$1_save_CPPFLAGS="$CPPFLAGS"
+	ompi_check_portals4_$1_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
 	ompi_check_portals4_$1_save_LDFLAGS="$LDFLAGS"
 	ompi_check_portals4_$1_save_LIBS="$LIBS"
 
@@ -60,7 +60,7 @@ AC_DEFUN([OPAL_CHECK_PORTALS4],[
 				  [ompi_check_portals4_happy="no"])],
               [ompi_check_portals4_happy="no"])
 
-	CPPFLAGS="$ompi_check_portals4_$1_save_CPPFLAGS"
+	OPAL_CPPFLAGS="$ompi_check_portals4_$1_save_OPAL_CPPFLAGS"
 	LDFLAGS="$ompi_check_portals4_$1_save_LDFLAGS"
 	LIBS="$ompi_check_portals4_$1_save_LIBS"
 
@@ -99,7 +99,7 @@ AC_DEFUN([OPAL_CHECK_PORTALS4],[
 
     AS_IF([test "$ompi_check_portals4_happy" = "yes"],
           [$1_LDFLAGS="[$]$1_LDFLAGS $opal_check_portals4_LDFLAGS"
-	   $1_CPPFLAGS="[$]$1_CPPFLAGS $opal_check_portals4_CPPFLAGS"
+	   $1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $opal_check_portals4_OPAL_CPPFLAGS"
 	   $1_LIBS="[$]$1_LIBS $opal_check_portals4_LIBS"
 	   $2],
           [AS_IF([test ! -z "$with_portals4" && test "$with_portals4" != "no"],

@@ -42,10 +42,10 @@ AC_DEFUN([OPAL_CC_HELPER],[
 
 
 AC_DEFUN([OPAL_PROG_CC_C11_HELPER],[
-    OPAL_VAR_SCOPE_PUSH([opal_prog_cc_c11_helper_CFLAGS_save])
+    OPAL_VAR_SCOPE_PUSH([opal_prog_cc_c11_helper_OPAL_CFLAGS_save])
 
-    opal_prog_cc_c11_helper_CFLAGS_save=$CFLAGS
-    CFLAGS="$CFLAGS $1"
+    opal_prog_cc_c11_helper_OPAL_CFLAGS_save=$OPAL_CFLAGS
+    OPAL_CFLAGS="$OPAL_CFLAGS $1"
 
     OPAL_CC_HELPER([if $CC $1 supports C11 _Thread_local], [opal_prog_cc_c11_helper__Thread_local_available],
                    [],[[static _Thread_local int  foo = 1;++foo;]])
@@ -70,7 +70,7 @@ AC_DEFUN([OPAL_PROG_CC_C11_HELPER],[
           [$2],
           [$3])
 
-    CFLAGS=$opal_prog_cc_c11_helper_CFLAGS_save
+    OPAL_CFLAGS=$opal_prog_cc_c11_helper_OPAL_CFLAGS_save
 
     OPAL_VAR_SCOPE_POP
 ])
@@ -105,7 +105,7 @@ AC_DEFUN([OPAL_PROG_CC_C11],[
             for flag in $(echo $opal_prog_cc_c11_flags | tr ' ' '\n') ; do
                 OPAL_PROG_CC_C11_HELPER([$flag],[opal_cv_c11_flag=$flag],[])
                 if test "x$opal_cv_c11_flag" != "x" ; then
-                    CFLAGS="$CFLAGS $opal_cv_c11_flag"
+                    OPAL_CFLAGS="$OPAL_CFLAGS $opal_cv_c11_flag"
                     AC_MSG_NOTICE([using $flag to enable C11 support])
                     opal_cv_c11_supported=yes
                     break
@@ -129,14 +129,14 @@ AC_DEFUN([OPAL_PROG_CC_C11],[
 # VERSION file at the base of our source directory on case-
 # insensitive filesystems.
 AC_DEFUN([OPAL_CHECK_CC_IQUOTE],[
-    OPAL_VAR_SCOPE_PUSH([opal_check_cc_iquote_CFLAGS_save])
-    opal_check_cc_iquote_CFLAGS_save=${CFLAGS}
-    CFLAGS="${CFLAGS} -iquote ."
+    OPAL_VAR_SCOPE_PUSH([opal_check_cc_iquote_OPAL_CFLAGS_save])
+    opal_check_cc_iquote_OPAL_CFLAGS_save=${OPAL_CFLAGS}
+    OPAL_CFLAGS="${OPAL_CFLAGS} -iquote ."
     AC_MSG_CHECKING([for $CC option to add a directory only to the search path for the quote form of include])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[])],
 		      [opal_cc_iquote="-iquote"],
 		      [opal_cc_iquote="-I"])
-    CFLAGS=${opal_check_cc_iquote_CFLAGS_save}
+    OPAL_CFLAGS=${opal_check_cc_iquote_OPAL_CFLAGS_save}
     OPAL_VAR_SCOPE_POP
     AC_MSG_RESULT([$opal_cc_iquote])
 ])
@@ -247,10 +247,10 @@ AC_DEFUN([OPAL_SETUP_CC],[
             # For compilers > gcc-4.x, use --coverage for
             # compiling and linking to circumvent trouble with
             # libgcov.
-            CFLAGS_orig="$CFLAGS"
+            OPAL_CFLAGS_orig="$OPAL_CFLAGS"
             LDFLAGS_orig="$LDFLAGS"
 
-            CFLAGS="$CFLAGS_orig --coverage"
+            OPAL_CFLAGS="$OPAL_CFLAGS_orig --coverage"
             LDFLAGS="$LDFLAGS_orig --coverage"
             OPAL_COVERAGE_FLAGS=
 
@@ -269,14 +269,14 @@ AC_DEFUN([OPAL_SETUP_CC],[
                 CLEANFILES="*.bb *.bbg ${CLEANFILES}"
                 CONFIG_CLEAN_FILES="*.da *.*.gcov ${CONFIG_CLEAN_FILES}"
             fi
-            CFLAGS="$CFLAGS_orig $OPAL_COVERAGE_FLAGS"
+            OPAL_CFLAGS="$OPAL_CFLAGS_orig $OPAL_COVERAGE_FLAGS"
             LDFLAGS="$LDFLAGS_orig $OPAL_COVERAGE_FLAGS"
-            OPAL_WRAPPER_FLAGS_ADD([CFLAGS], [$OPAL_COVERAGE_FLAGS])
+            OPAL_WRAPPER_FLAGS_ADD([OPAL_CFLAGS], [$OPAL_COVERAGE_FLAGS])
             OPAL_WRAPPER_FLAGS_ADD([LDFLAGS], [$OPAL_COVERAGE_FLAGS])
 
-            OPAL_FLAGS_UNIQ(CFLAGS)
+            OPAL_FLAGS_UNIQ(OPAL_CFLAGS)
             OPAL_FLAGS_UNIQ(LDFLAGS)
-            AC_MSG_WARN([$OPAL_COVERAGE_FLAGS has been added to CFLAGS (--enable-coverage)])
+            AC_MSG_WARN([$OPAL_COVERAGE_FLAGS has been added to OPAL_CFLAGS (--enable-coverage)])
 
             WANT_DEBUG=1
         else
@@ -287,18 +287,18 @@ AC_DEFUN([OPAL_SETUP_CC],[
 
     # Do we want debugging?
     if test "$WANT_DEBUG" = "1" && test "$enable_debug_symbols" != "no" ; then
-        CFLAGS="$CFLAGS -g"
+        OPAL_CFLAGS="$OPAL_CFLAGS -g"
 
-        OPAL_FLAGS_UNIQ(CFLAGS)
-        AC_MSG_WARN([-g has been added to CFLAGS (--enable-debug)])
+        OPAL_FLAGS_UNIQ(OPAL_CFLAGS)
+        AC_MSG_WARN([-g has been added to OPAL_CFLAGS (--enable-debug)])
     fi
 
     # These flags are generally gcc-specific; even the
     # gcc-impersonating compilers won't accept them.
-    OPAL_CFLAGS_BEFORE_PICKY="$CFLAGS"
+    OPAL_CFLAGS_BEFORE_PICKY="$OPAL_CFLAGS"
 
     if test $WANT_PICKY_COMPILER -eq 1; then
-        CFLAGS_orig=$CFLAGS
+        OPAL_CFLAGS_orig=$OPAL_CFLAGS
         add=
 
         # These flags are likely GCC-specific (or, more specifically,
@@ -317,7 +317,7 @@ AC_DEFUN([OPAL_SETUP_CC],[
         #
         # Actually, this is not real fix, as GCC will pass on any -Wno- flag,
         # have fun with the warning: -Wno-britney
-        CFLAGS="$CFLAGS_orig $add -Wno-long-double -Wstrict-prototypes"
+        OPAL_CFLAGS="$OPAL_CFLAGS_orig $add -Wno-long-double -Wstrict-prototypes"
 
         AC_CACHE_CHECK([if $CC supports -Wno-long-double],
             [opal_cv_cc_wno_long_double],
@@ -354,16 +354,16 @@ AC_DEFUN([OPAL_SETUP_CC],[
             add="$add -Werror-implicit-function-declaration "
         fi
 
-        CFLAGS="$CFLAGS_orig $add"
-        OPAL_FLAGS_UNIQ(CFLAGS)
-        AC_MSG_WARN([$add has been added to CFLAGS (--enable-picky)])
+        OPAL_CFLAGS="$OPAL_CFLAGS_orig $add"
+        OPAL_FLAGS_UNIQ(OPAL_CFLAGS)
+        AC_MSG_WARN([$add has been added to OPAL_CFLAGS (--enable-picky)])
         unset add
     fi
 
     # See if this version of gcc allows -finline-functions and/or
     # -fno-strict-aliasing.  Even check the gcc-impersonating compilers.
     if test "$GCC" = "yes"; then
-        CFLAGS_orig="$CFLAGS"
+        OPAL_CFLAGS_orig="$OPAL_CFLAGS"
 
         # Note: Some versions of clang (at least >= 3.5 -- perhaps
         # older versions, too?) will *warn* about -finline-functions,
@@ -371,7 +371,7 @@ AC_DEFUN([OPAL_SETUP_CC],[
         # that warning, too.  The clang warning looks like this:
         # clang: warning: optimization flag '-finline-functions' is not supported
         # clang: warning: argument unused during compilation: '-finline-functions'
-        CFLAGS="$CFLAGS_orig -finline-functions"
+        OPAL_CFLAGS="$OPAL_CFLAGS_orig -finline-functions"
         add=
         AC_CACHE_CHECK([if $CC supports -finline-functions],
                    [opal_cv_cc_finline_functions],
@@ -390,10 +390,10 @@ AC_DEFUN([OPAL_SETUP_CC],[
         if test "$opal_cv_cc_finline_functions" = "yes" ; then
             add=" -finline-functions"
         fi
-        CFLAGS="$CFLAGS_orig$add"
+        OPAL_CFLAGS="$OPAL_CFLAGS_orig$add"
 
-        CFLAGS_orig="$CFLAGS"
-        CFLAGS="$CFLAGS_orig -fno-strict-aliasing"
+        OPAL_CFLAGS_orig="$OPAL_CFLAGS"
+        OPAL_CFLAGS="$OPAL_CFLAGS_orig -fno-strict-aliasing"
         add=
         AC_CACHE_CHECK([if $CC supports -fno-strict-aliasing],
                    [opal_cv_cc_fno_strict_aliasing],
@@ -403,40 +403,40 @@ AC_DEFUN([OPAL_SETUP_CC],[
         if test "$opal_cv_cc_fno_strict_aliasing" = "yes" ; then
             add=" -fno-strict-aliasing"
         fi
-        CFLAGS="$CFLAGS_orig$add"
+        OPAL_CFLAGS="$OPAL_CFLAGS_orig$add"
 
-        OPAL_FLAGS_UNIQ(CFLAGS)
-        AC_MSG_WARN([$add has been added to CFLAGS])
+        OPAL_FLAGS_UNIQ(OPAL_CFLAGS)
+        AC_MSG_WARN([$add has been added to OPAL_CFLAGS])
         unset add
     fi
 
     # Try to enable restrict keyword
-    RESTRICT_CFLAGS=
+    RESTRICT_OPAL_CFLAGS=
     case "$opal_c_vendor" in
         intel)
-            RESTRICT_CFLAGS="-restrict"
+            RESTRICT_OPAL_CFLAGS="-restrict"
         ;;
         sgi)
-            RESTRICT_CFLAGS="-LANG:restrict=ON"
+            RESTRICT_OPAL_CFLAGS="-LANG:restrict=ON"
         ;;
     esac
-    if test ! -z "$RESTRICT_CFLAGS" ; then
-        CFLAGS_orig="$CFLAGS"
-        CFLAGS="$CFLAGS_orig $RESTRICT_CFLAGS"
+    if test ! -z "$RESTRICT_OPAL_CFLAGS" ; then
+        OPAL_CFLAGS_orig="$OPAL_CFLAGS"
+        OPAL_CFLAGS="$OPAL_CFLAGS_orig $RESTRICT_OPAL_CFLAGS"
         add=
-        AC_CACHE_CHECK([if $CC supports $RESTRICT_CFLAGS],
+        AC_CACHE_CHECK([if $CC supports $RESTRICT_OPAL_CFLAGS],
                    [opal_cv_cc_restrict_cflags],
                    [AC_TRY_COMPILE([], [],
                                    [opal_cv_cc_restrict_cflags="yes"],
                                    [opal_cv_cc_restrict_cflags="no"])])
         if test "$opal_cv_cc_restrict_cflags" = "yes" ; then
-            add=" $RESTRICT_CFLAGS"
+            add=" $RESTRICT_OPAL_CFLAGS"
         fi
 
-        CFLAGS="${CFLAGS_orig}${add}"
-        OPAL_FLAGS_UNIQ([CFLAGS])
+        OPAL_CFLAGS="${OPAL_CFLAGS_orig}${add}"
+        OPAL_FLAGS_UNIQ([OPAL_CFLAGS])
         if test "$add" != "" ; then
-            AC_MSG_WARN([$add has been added to CFLAGS])
+            AC_MSG_WARN([$add has been added to OPAL_CFLAGS])
         fi
         unset add
     fi
@@ -511,9 +511,9 @@ AC_DEFUN([OPAL_SETUP_CC],[
     OPAL_CFLAGS_BEFORE_PICKY="$co_result"
 
     AC_MSG_CHECKING([for C optimization flags])
-    OPAL_ENSURE_CONTAINS_OPTFLAGS(["$CFLAGS"])
+    OPAL_ENSURE_CONTAINS_OPTFLAGS(["$OPAL_CFLAGS"])
     AC_MSG_RESULT([$co_result])
-    CFLAGS="$co_result"
+    OPAL_CFLAGS="$co_result"
     OPAL_VAR_SCOPE_POP
 ])
 
@@ -532,10 +532,10 @@ AC_DEFUN([_OPAL_PROG_CC],[
     # Check for the compiler
     #
     OPAL_VAR_SCOPE_PUSH([opal_cflags_save dummy opal_cc_arvgv0])
-    opal_cflags_save="$CFLAGS"
+    opal_cflags_save="$OPAL_CFLAGS"
     AC_PROG_CC
     BASECC="`basename $CC`"
-    CFLAGS="$opal_cflags_save"
+    OPAL_CFLAGS="$opal_cflags_save"
     AC_DEFINE_UNQUOTED(OPAL_CC, "$CC", [OMPI underlying C compiler])
     set dummy $CC
     opal_cc_argv0=[$]2

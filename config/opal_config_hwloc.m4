@@ -26,20 +26,20 @@ dnl         embedded builds.  This is used by PRRTE, but should not
 dnl         be used by new code.
 dnl   * opal_hwloc_mode - either external or internal.  If internal,
 dnl         --with-hwloc should be ignored by other packages
-dnl   * opal_hwloc_CPPFLAGS - the C Preprocessor flags necessary to
+dnl   * opal_hwloc_OPAL_CPPFLAGS - the C Preprocessor flags necessary to
 dnl         run the preprocessor on a file which relies on Hwloc
-dnl         headers.  This will be folded into the global CPPFLAGS,
+dnl         headers.  This will be folded into the global OPAL_CPPFLAGS,
 dnl         so most people should never need this.
 dnl   * opal_hwloc_LDFLAGS - the linker flags necessary to run the
 dnl         linker on a file which relies on Hwloc libraries.  This
-dnl         will be folded into the global CPPFLAGS, so most people
+dnl         will be folded into the global OPAL_CPPFLAGS, so most people
 dnl         should never need this.
 dnl   * opal_hwloc_LIBS - the libraries necessary to link source which
 dnl         uses Hwloc.  Cannot be added to LIBS yet, because then
 dnl         other execution tests later in configure (there are sadly
 dnl         some) would fail if the path in LDFLAGS was not added to
 dnl         LD_LIBRARY_PATH.
-dnl   * CPPFLAGS, LDFLAGS - Updated opal_hwloc_CPPFLAGS and
+dnl   * OPAL_CPPFLAGS, LDFLAGS - Updated opal_hwloc_OPAL_CPPFLAGS and
 dnl         opal_hwloc_LDFLAGS.
 AC_DEFUN([OPAL_CONFIG_HWLOC], [
     OPAL_VAR_SCOPE_PUSH([external_hwloc_happy internal_hwloc_happy])
@@ -88,9 +88,9 @@ dnl
 dnl only safe to call from OPAL_CONFIG_HWLOC, assumes variables from
 dnl there are set.
 AC_DEFUN([_OPAL_CONFIG_HWLOC_EXTERNAL], [
-    OPAL_VAR_SCOPE_PUSH([opal_hwloc_CPPFLAGS_save opal_hwloc_LDFLAGS_save opal_hwloc_LIBS_save opal_hwloc_external_support])
+    OPAL_VAR_SCOPE_PUSH([opal_hwloc_OPAL_CPPFLAGS_save opal_hwloc_LDFLAGS_save opal_hwloc_LIBS_save opal_hwloc_external_support])
 
-    opal_hwloc_CPPFLAGS_save=$CPPFLAGS
+    opal_hwloc_OPAL_CPPFLAGS_save=$OPAL_CPPFLAGS
     opal_hwloc_LDFLAGS_save=$LDFLAGS
     opal_hwloc_LIBS_save=$LIBS
 
@@ -109,7 +109,7 @@ AC_DEFUN([_OPAL_CONFIG_HWLOC_EXTERNAL], [
                        [opal_hwloc_external_support=no])
 
     # need these set for the tests below.  If things fail, will undo at the end.
-    CPPFLAGS="$opal_hwloc_CPPFLAGS_save $opal_hwloc_CPPFLAGS"
+    OPAL_CPPFLAGS="$opal_hwloc_OPAL_CPPFLAGS_save $opal_hwloc_OPAL_CPPFLAGS"
     LDFLAGS="$opal_hwloc_LDFLAGS_save $opal_hwloc_LDFLAGS"
     LIBS="$opal_hwloc_LIBS_save $opal_hwloc_LIBS"
 
@@ -135,7 +135,7 @@ AC_DEFUN([_OPAL_CONFIG_HWLOC_EXTERNAL], [
 
     AS_IF([test "$opal_hwloc_external_support" = "yes"],
           [$1],
-          [CPPFLAGS="$opal_hwloc_CPPFLAGS_save"
+          [OPAL_CPPFLAGS="$opal_hwloc_OPAL_CPPFLAGS_save"
            $2])
 
     OPAL_VAR_SCOPE_POP
@@ -165,8 +165,8 @@ AC_DEFUN([_OPAL_CONFIG_HWLOC_INTERNAL], [
          # note: because we only ship/commit a tarball (and not the source
          # directory), the source is always expanded in the builddir, so we
          # only need to add a -I to the builddir.
-         opal_hwloc_CPPFLAGS="-I$OMPI_TOP_BUILDDIR/$internal_hwloc_location/include -I$OMPI_TOP_SRCDIR/$internal_hwloc_location/include"
-         CPPFLAGS="$CPPFLAGS $opal_hwloc_CPPFLAGS"
+         opal_hwloc_OPAL_CPPFLAGS="-I$OMPI_TOP_BUILDDIR/$internal_hwloc_location/include -I$OMPI_TOP_SRCDIR/$internal_hwloc_location/include"
+         OPAL_CPPFLAGS="$OPAL_CPPFLAGS $opal_hwloc_OPAL_CPPFLAGS"
          # No need to update LDFLAGS, because they will install into
          # our tree and in the mean time are referenced by their .la
          # files.

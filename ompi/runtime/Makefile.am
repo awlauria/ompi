@@ -48,6 +48,8 @@ lib@OMPI_LIBMPI_NAME@_la_SOURCES += \
 noinst_LTLIBRARIES += libompi_mpir.la
 libompi_mpir_la_SOURCES = \
 	runtime/ompi_mpi_init.c
-libompi_mpir_la_CFLAGS = $(MPIR_UNWIND_CFLAGS)
+
+libompi_mpir_la_CFLAGS = $(MPIR_UNWIND_CFLAGS) $(OPAL_DEBUGGER_CFLAGS)
+libompi_mpir_la_CPPFLAGS = $(MPIR_UNWIND_CFLAGS) $(OPAL_DEBUGGER_CPPFLAGS)
 
 lib@OMPI_LIBMPI_NAME@_la_LIBADD += libompi_mpir.la

@@ -18,18 +18,18 @@ dnl
 
 # OPAL_CHECK_KNEM(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if knem support can be found.  sets prefix_{CPPFLAGS,
+# check if knem support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OPAL_CHECK_KNEM],[
     if test -z "$opal_check_knem_happy" ; then
-	OPAL_VAR_SCOPE_PUSH([opal_check_knem_$1_save_CPPFLAGS opal_check_knem_dir])
+	OPAL_VAR_SCOPE_PUSH([opal_check_knem_$1_save_OPAL_CPPFLAGS opal_check_knem_dir])
 	AC_ARG_WITH([knem],
 		    [AC_HELP_STRING([--with-knem(=DIR)],
 				    [Build knem Linux kernel module support, searching for headers in DIR/include])])
 
 	OPAL_CHECK_WITHDIR([knem], [$with_knem], [include/knem_io.h])
-	opal_check_knem_$1_save_CPPFLAGS="$CPPFLAGS"
+	opal_check_knem_$1_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
 
 	opal_check_knem_happy=no
 
@@ -44,7 +44,7 @@ AC_DEFUN([OPAL_CHECK_KNEM],[
 					  [])],
 	      [])
 
-	CPPFLAGS="$CPPFLAGS $ompi_check_knem_CPPFLAGS"
+	OPAL_CPPFLAGS="$OPAL_CPPFLAGS $ompi_check_knem_OPAL_CPPFLAGS"
 
 	# need at least version 0x0000000b
 	if test "$opal_check_knem_happy" = "yes" ; then
@@ -59,14 +59,14 @@ AC_DEFUN([OPAL_CHECK_KNEM],[
 			      [opal_check_knem_happy=no])
 	fi
 
-	CPPFLAGS="$opal_check_knem_$1_save_CPPFLAGS"
+	OPAL_CPPFLAGS="$opal_check_knem_$1_save_OPAL_CPPFLAGS"
 
         OPAL_SUMMARY_ADD([[Transports]],[[Shared memory/Linux KNEM]],[$1],[$opal_check_knem_happy])
 	OPAL_VAR_SCOPE_POP
     fi
 
     AS_IF([test "$opal_check_knem_happy" = "yes"],
-          [$1_CPPFLAGS="[$]$1_CPPFLAGS $ompi_check_knem_CPPFLAGS"
+          [$1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $ompi_check_knem_OPAL_CPPFLAGS"
 	   $2],
           [AS_IF([test ! -z "$with_knem" && test "$with_knem" != "no"],
                  [AC_MSG_ERROR([KNEM support requested but not found.  Aborting])])

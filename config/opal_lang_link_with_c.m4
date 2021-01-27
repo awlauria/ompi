@@ -34,7 +34,7 @@ int $testfunc_name(int a) { return a; }
 EOF
 
      # Now compile both parts
-     OPAL_LOG_COMMAND([$CC -c $CFLAGS $CPPFLAGS conftest_c.$ac_ext],
+     OPAL_LOG_COMMAND([$CC -c $OPAL_CFLAGS $OPAL_CPPFLAGS conftest_c.$ac_ext],
        [AC_LANG_PUSH($1)
         ompi_lang_link_with_c_libs="$LIBS"
         LIBS="conftest_c.o $LIBS"

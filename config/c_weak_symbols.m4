@@ -45,9 +45,9 @@ EOF
 
 # Try the compile
 OPAL_LOG_COMMAND(
-    [$CC $CFLAGS  -c conftest_weak.c],
+    [$CC $OPAL_CFLAGS  -c conftest_weak.c],
     [OPAL_LOG_COMMAND(
-        [$CC $CFLAGS  conftest.c conftest_weak.o -o conftest $LDFLAGS $LIBS],
+        [$CC $OPAL_CFLAGS  conftest.c conftest_weak.o -o conftest $LDFLAGS $LIBS],
         [opal_c_weak_symbols_happy=1],
         [opal_c_weak_symbols_happy=0])],
     [opal_c_weak_symbols_happy=0])
@@ -105,9 +105,9 @@ EOF
 
 # Try the compile
 OPAL_LOG_COMMAND(
-    [$CC $CFLAGS  -c conftest_weak.c],
+    [$CC $OPAL_CFLAGS  -c conftest_weak.c],
     [OPAL_LOG_COMMAND(
-        [$CC $CFLAGS  conftest.c conftest_weak.o -o conftest $LDFLAGS $LIBS],
+        [$CC $OPAL_CFLAGS  conftest.c conftest_weak.o -o conftest $LDFLAGS $LIBS],
         [opal_c_macro_weak_symbols_happy=1],
         [opal_c_macro_weak_symbols_happy=0])],
     [opal_c_macro_weak_symbols_happy=0])

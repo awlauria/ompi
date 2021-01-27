@@ -52,8 +52,8 @@ AC_DEFUN([_OPAL_CHECK_PACKAGE_HEADER], [
 
     AS_IF([test "$opal_check_package_header_happy" = "no"],
           [AS_IF([test "$dir_prefix" != ""],
-                 [$1_CPPFLAGS="$$1_CPPFLAGS -I$dir_prefix/include"
-                  CPPFLAGS="$CPPFLAGS -I$dir_prefix/include"])
+                 [$1_OPAL_CPPFLAGS="$$1_OPAL_CPPFLAGS -I$dir_prefix/include"
+                  OPAL_CPPFLAGS="$OPAL_CPPFLAGS -I$dir_prefix/include"])
           AC_CHECK_HEADERS([$2], [opal_check_package_header_happy="yes"], [], [$6])
 	  AS_IF([test "$opal_check_package_header_happy" = "yes"], [$4], [$5])],
           [$4])
@@ -168,7 +168,7 @@ dnl -----------------------------------------------------------
 dnl Check for package defined by header and libs, and probably
 dnl located in dir-prefix, possibly with libs in libdir-prefix.
 dnl Both dir-prefix and libdir-prefix can be empty.  Will set
-dnl prefix_{CPPFLAGS, LDFLAGS, LIBS} as needed.
+dnl prefix_{OPAL_CPPFLAGS, LDFLAGS, LIBS} as needed.
 dnl
 dnl The general intent of this macro is to provide finer-grained scoping
 dnl of C preprocessor flags, linker flags, and libraries (as opposed to
@@ -177,7 +177,7 @@ dnl which get used to compile/link *everything*).
 dnl
 dnl Here is a breakdown of the parameters:
 dnl
-dnl * prefix: the macro sets $prefix_CPPFLAGS, $prefix_LDFLAGS, and
+dnl * prefix: the macro sets $prefix_OPAL_CPPFLAGS, $prefix_LDFLAGS, and
 dnl   $prefix_LIBS (and AC_SUBSTs all of them).  For example, if a
 dnl   provider uses this macro to check for a header/library that it
 dnl   needs, it might well set prefix to be its provider name.
@@ -197,15 +197,15 @@ dnl * action_if_not_found: otherwise, execute action_if_not_found
 dnl * extra_includes: if including header_filename requires additional
 dnl   headers to be included first, list them here
 dnl
-dnl The output _CPPFLAGS, _LDFLAGS, and _LIBS can be used to limit the
+dnl The output _OPAL_CPPFLAGS, _LDFLAGS, and _LIBS can be used to limit the
 dnl scope various flags in Makefiles.
 dnl
 AC_DEFUN([OPAL_CHECK_PACKAGE],[
-    opal_check_package_$1_save_CPPFLAGS="$CPPFLAGS"
+    opal_check_package_$1_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
     opal_check_package_$1_save_LDFLAGS="$LDFLAGS"
     opal_check_package_$1_save_LIBS="$LIBS"
 
-    opal_check_package_$1_orig_CPPFLAGS="$$1_CPPFLAGS"
+    opal_check_package_$1_orig_OPAL_CPPFLAGS="$$1_OPAL_CPPFLAGS"
     opal_check_package_$1_orig_LDFLAGS="$$1_LDFLAGS"
     opal_check_package_$1_orig_LIBS="$$1_LIBS"
 
@@ -218,12 +218,12 @@ AC_DEFUN([OPAL_CHECK_PACKAGE],[
 
     AS_IF([test "$opal_check_package_happy" = "yes"],
           [$8],
-          [$1_CPPFLAGS="$opal_check_package_$1_orig_CPPFLAGS"
+          [$1_OPAL_CPPFLAGS="$opal_check_package_$1_orig_OPAL_CPPFLAGS"
            $1_LDFLAGS="$opal_check_package_$1_orig_LDFLAGS"
            $1_LIBS="$opal_check_package_$1_orig_LIBS"
            $9])
 
-    CPPFLAGS="$opal_check_package_$1_save_CPPFLAGS"
+    OPAL_CPPFLAGS="$opal_check_package_$1_save_OPAL_CPPFLAGS"
     LDFLAGS="$opal_check_package_$1_save_LDFLAGS"
     LIBS="$opal_check_package_$1_save_LIBS"
 ])

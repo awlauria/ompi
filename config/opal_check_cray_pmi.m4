@@ -42,7 +42,7 @@ AC_DEFUN([OPAL_CHECK_CRAY_PMI_EXPLICIT],[
     AS_IF([test "$opal_cray_pmi_lib_good" -eq 1 && test "$opal_cray_pmi_include_good" -eq 1],
            [CRAY_PMI_LDFLAGS="-L$with_cray_pmi/lib64 -L/usr/lib/alps"
             CRAY_PMI_LIBS="-L$with_cray_pmi/lib64 -lpmi"
-            CRAY_PMI_CFLAGS="-I $with_cray_pmi/include"
+            CRAY_PMI_OPAL_CFLAGS="-I $with_cray_pmi/include"
             $1],
             [$2])
 
@@ -98,7 +98,7 @@ AC_DEFUN([OPAL_CHECK_CRAY_PMI],[
 
     AS_IF([test "$opal_check_cray_pmi_happy" = "yes"],
           [$1_LDFLAGS="$CRAY_PMI_LIBS"
-           $1_CPPFLAGS="$CRAY_PMI_CFLAGS"
+           $1_OPAL_CPPFLAGS="$CRAY_PMI_OPAL_CFLAGS"
            $1_LIBS="$CRAY_PMI_LIBS"
            $2], [$3])
 ])

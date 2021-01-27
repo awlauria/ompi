@@ -84,5 +84,7 @@ endif
 
 libmpiext_pcollreq_mpifh_la_LIBADD = \
         profile/libpmpiext_pcollreq_mpifh.la
+libmpiext_pcollreq_mpifh_la_CFLAGS = $(OPAL_CFLAGS)
+libmpiext_pcollreq_mpifh_la_CPPFLAGS = $(OPAL_CPPFLAGS)
 
 endif

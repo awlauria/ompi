@@ -16,7 +16,7 @@
 
 # OMPI_CHECK_UCX(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if UCX support can be found.  sets prefix_{CPPFLAGS,
+# check if UCX support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_UCX],[
@@ -70,7 +70,7 @@ AC_DEFUN([OMPI_CHECK_UCX],[
                                       [ompi_check_ucx_libdir=$ompi_check_ucx_dir/lib64],
                                       [ompi_check_ucx_libdir=$ompi_check_ucx_dir/lib])])
 
-                         ompi_check_ucx_$1_save_CPPFLAGS="$CPPFLAGS"
+                         ompi_check_ucx_$1_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
                          ompi_check_ucx_$1_save_LDFLAGS="$LDFLAGS"
                          ompi_check_ucx_$1_save_LIBS="$LIBS"
 
@@ -84,26 +84,26 @@ AC_DEFUN([OMPI_CHECK_UCX],[
                                             [ompi_check_ucx_happy="yes"],
                                             [ompi_check_ucx_happy="no"])
 
-                         CPPFLAGS="$ompi_check_ucx_$1_save_CPPFLAGS"
+                         OPAL_CPPFLAGS="$ompi_check_ucx_$1_save_OPAL_CPPFLAGS"
                          LDFLAGS="$ompi_check_ucx_$1_save_LDFLAGS"
                          LIBS="$ompi_check_ucx_$1_save_LIBS"
 
                          AS_IF([test "$ompi_check_ucx_happy" = yes],
                                [AC_MSG_CHECKING(for UCX version compatibility)
                                 AC_REQUIRE_CPP
-                                old_CPPFLAGS="$CPPFLAGS"
-                                CPPFLAGS="$CPPFLAGS -I$ompi_check_ucx_dir/include"
+                                old_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
+                                OPAL_CPPFLAGS="$OPAL_CPPFLAGS -I$ompi_check_ucx_dir/include"
                                 AC_COMPILE_IFELSE(
                                     [AC_LANG_PROGRAM([[#include <uct/api/version.h>]],[[]])],
                                     [ompi_check_ucx_happy="yes"],
                                     [ompi_check_ucx_happy="no"])
 
                                 AC_MSG_RESULT([$ompi_check_ucx_happy])
-                                CPPFLAGS=$old_CPPFLAGS])])
+                                OPAL_CPPFLAGS=$old_OPAL_CPPFLAGS])])
 
-                  old_CPPFLAGS="$CPPFLAGS"
+                  old_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
                   AS_IF([test -n "$ompi_check_ucx_dir"],
-                        [CPPFLAGS="$CPPFLAGS -I$ompi_check_ucx_dir/include"])
+                        [OPAL_CPPFLAGS="$OPAL_CPPFLAGS -I$ompi_check_ucx_dir/include"])
                   AC_CHECK_DECLS([ucp_tag_send_nbr],
                                  [AC_DEFINE([HAVE_UCP_TAG_SEND_NBR],[1],
                                             [have ucp_tag_send_nbr()])], [],
@@ -142,12 +142,12 @@ AC_DEFUN([OMPI_CHECK_UCX],[
                   AC_CHECK_TYPES([ucp_request_param_t],
                                  [], [],
                                  [[#include <ucp/api/ucp.h>]])
-                  CPPFLAGS=$old_CPPFLAGS
+                  OPAL_CPPFLAGS=$old_OPAL_CPPFLAGS
 
                   OPAL_SUMMARY_ADD([[Transports]],[[Open UCX]],[$1],[$ompi_check_ucx_happy])])])
 
     AS_IF([test "$ompi_check_ucx_happy" = "yes"],
-          [$1_CPPFLAGS="[$]$1_CPPFLAGS $ompi_check_ucx_CPPFLAGS"
+          [$1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $ompi_check_ucx_OPAL_CPPFLAGS"
            $1_LDFLAGS="[$]$1_LDFLAGS $ompi_check_ucx_LDFLAGS"
            $1_LIBS="[$]$1_LIBS $ompi_check_ucx_LIBS"
            $2],

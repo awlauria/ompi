@@ -26,7 +26,7 @@ dnl
 
 # OPAL_CHECK_UGNI(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if GNI support can be found.  sets prefix_{CPPFLAGS,
+# check if GNI support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 #
@@ -44,15 +44,15 @@ AC_DEFUN([OPAL_CHECK_UGNI], [
 			  [opal_check_ugni_happy="yes"],
                           [opal_check_ugni_happy="no"])])
 
-        opal_check_ugni_$1_save_CPPFLAGS="$CPPFLAGS"
+        opal_check_ugni_$1_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
         opal_check_ugni_$1_save_LIBS="$LIBS"
 
         if test "$opal_check_ugni_happy" = "yes" ; then
-            CPPFLAGS="$CPPFLAGS $CRAY_UGNI_CFLAGS"
+            OPAL_CPPFLAGS="$OPAL_CPPFLAGS $CRAY_UGNI_OPAL_CFLAGS"
             LIBS="$LIBS $CRAY_UGNI_LIBS"
-#    echo "+++++++++++++++++++++++CPPFLAGS",$CPPFLAGS
+#    echo "+++++++++++++++++++++++OPAL_CPPFLAGS",$OPAL_CPPFLAGS
 #    echo "+++++++++++++++++++++++LDFLAGSS",$LDFLAGS
-#    echo "+++++++++++++++++++++++1_CPPFLAGS",$$1_CPPFLAGS
+#    echo "+++++++++++++++++++++++1_OPAL_CPPFLAGS",$$1_OPAL_CPPFLAGS
 #    echo "+++++++++++++++++++++++1_LDFLAGSS",$$1_LDFLAGS
 
 #   sanity checks
@@ -60,7 +60,7 @@ AC_DEFUN([OPAL_CHECK_UGNI], [
             AC_CHECK_HEADER([gni_pub.h],[],AC_MSG_ERROR(['gni_pub.h not found.']))
             AC_CHECK_FUNCS([GNI_GetJobResInfo])
 
-            CPPFLAGS="$opal_check_ugni_$1_save_CPPFLAGS"
+            OPAL_CPPFLAGS="$opal_check_ugni_$1_save_OPAL_CPPFLAGS"
             LIBS="$opal_check_ugni_$1_save_LIBS"
         fi
 
@@ -72,7 +72,7 @@ AC_DEFUN([OPAL_CHECK_UGNI], [
     fi
 
     AS_IF([test "$opal_check_ugni_happy" = "yes"],
-          [$1_CPPFLAGS="[$]$1_CPPFLAGS $CRAY_UGNI_CFLAGS"
+          [$1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $CRAY_UGNI_OPAL_CFLAGS"
 	   $1_LIBS="[$]$1_LIBS $CRAY_UGNI_LIBS"
 	   $2],
           [AS_IF([test ! -z "$with_ugni" && test "$with_ugni" != "no"],

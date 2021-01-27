@@ -26,7 +26,7 @@
 # ----------------------------------
 AC_DEFUN([PKG_PROG_PKG_CONFIG],
 [m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(CFLAGS|LIBS)))?$])
+m4_pattern_allow([^PKG_CONFIG(_(PATH|LIBDIR|SYSROOT_DIR|ALLOW_SYSTEM_(OPAL_CFLAGS|LIBS)))?$])
 m4_pattern_allow([^PKG_CONFIG_(DISABLE_UNINSTALLED|TOP_BUILD_DIR|DEBUG_SPEW)$])
 AC_ARG_VAR([PKG_CONFIG], [path to pkg-config utility])
 AC_ARG_VAR([PKG_CONFIG_PATH], [directories to add to pkg-config's search path])
@@ -105,16 +105,16 @@ fi[]dnl
 # --------------------------------------------------------------
 AC_DEFUN([PKG_CHECK_MODULES],
 [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
-AC_ARG_VAR([$1][_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
+AC_ARG_VAR([$1][_OPAL_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
 AC_ARG_VAR([$1][_LIBS], [linker flags for $1, overriding pkg-config])dnl
 
 pkg_failed=no
 AC_MSG_CHECKING([for $1])
 
-_PKG_CONFIG([$1][_CFLAGS], [cflags], [$2])
+_PKG_CONFIG([$1][_OPAL_CFLAGS], [cflags], [$2])
 _PKG_CONFIG([$1][_LIBS], [libs], [$2])
 
-m4_define([_PKG_TEXT], [Alternatively, you may set the environment variables $1[]_CFLAGS
+m4_define([_PKG_TEXT], [Alternatively, you may set the environment variables $1[]_OPAL_CFLAGS
 and $1[]_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details.])
 
@@ -151,7 +151,7 @@ _PKG_TEXT
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.])[]dnl
         ])
 else
-	$1[]_CFLAGS=$pkg_cv_[]$1[]_CFLAGS
+	$1[]_OPAL_CFLAGS=$pkg_cv_[]$1[]_OPAL_CFLAGS
 	$1[]_LIBS=$pkg_cv_[]$1[]_LIBS
         AC_MSG_RESULT([yes])
 	$3
@@ -246,18 +246,18 @@ fi[]dnl
 # --------------------------------------------------------------
 AC_DEFUN([PKG_CHECK_MODULES_STATIC],
 [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
-AC_ARG_VAR([$1][_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
+AC_ARG_VAR([$1][_OPAL_CFLAGS], [C compiler flags for $1, overriding pkg-config])dnl
 AC_ARG_VAR([$1][_LIBS], [linker flags for $1, overriding pkg-config])dnl
 AC_ARG_VAR([$1][_STATIC_LIBS], [static linker flags for $1, overriding pkg-config])dnl
 
 pkg_failed=no
 AC_MSG_CHECKING([for $1])
 
-_PKG_CONFIG([$1][_CFLAGS], [cflags], [$2])
+_PKG_CONFIG([$1][_OPAL_CFLAGS], [cflags], [$2])
 _PKG_CONFIG([$1][_LIBS], [libs], [$2])
 _PKG_CONFIG2([$1][_STATIC_LIBS], [libs], [static], [$2])
 
-m4_define([_PKG_TEXT], [Alternatively, you may set the environment variables $1[]_CFLAGS
+m4_define([_PKG_TEXT], [Alternatively, you may set the environment variables $1[]_OPAL_CFLAGS
 and $1[]_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details.])
 
@@ -294,7 +294,7 @@ _PKG_TEXT
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.])[]dnl
         ])
 else
-	$1[]_CFLAGS=$pkg_cv_[]$1[]_CFLAGS
+	$1[]_OPAL_CFLAGS=$pkg_cv_[]$1[]_OPAL_CFLAGS
 	$1[]_LIBS=$pkg_cv_[]$1[]_LIBS
 	$1[]_STATIC_LIBS=$pkg_cv_[]$1[]_STATIC_LIBS
         AC_MSG_RESULT([yes])

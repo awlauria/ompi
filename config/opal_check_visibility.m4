@@ -37,20 +37,20 @@ AC_DEFUN([OPAL_CHECK_VISIBILITY],[
         AC_MSG_CHECKING([$opal_msg])
         AC_MSG_RESULT([no (disabled)])
     else
-        CFLAGS_orig=$CFLAGS
+        OPAL_CFLAGS_orig=$OPAL_CFLAGS
 
         opal_add=
         case "$opal_c_vendor" in
         sun)
             # Check using Sun Studio -xldscope=hidden flag
             opal_add=-xldscope=hidden
-            CFLAGS="$OPAL_CFLAGS_BEFORE_PICKY $opal_add -errwarn=%all"
+            OPAL_CFLAGS="$OPAL_CFLAGS_BEFORE_PICKY $opal_add -errwarn=%all"
             ;;
 
         *)
             # Check using -fvisibility=hidden
             opal_add=-fvisibility=hidden
-            CFLAGS="$OPAL_CFLAGS_BEFORE_PICKY $opal_add -Werror"
+            OPAL_CFLAGS="$OPAL_CFLAGS_BEFORE_PICKY $opal_add -Werror"
             ;;
         esac
 
@@ -69,8 +69,8 @@ AC_DEFUN([OPAL_CHECK_VISIBILITY],[
               [AC_MSG_RESULT([no])],
               [AC_MSG_RESULT([yes])])
 
-        CFLAGS=$CFLAGS_orig
-        OPAL_VISIBILITY_CFLAGS=$opal_add
+        OPAL_CFLAGS=$OPAL_CFLAGS_orig
+        OPAL_VISIBILITY_OPAL_CFLAGS=$opal_add
 
         if test "$opal_add" != "" ; then
             opal_visibility_define=1

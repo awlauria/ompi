@@ -32,6 +32,9 @@ component_noinst = libmca_sharedfp_individual.la
 component_install =
 endif
 
+mca_sharedfp_individual_la_CFLAGS =  $(OPAL_CFLAGS)
+mca_sharedfp_individual_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 mcacomponentdir = $(ompilibdir)
 mcacomponent_LTLIBRARIES = $(component_install)
 mca_sharedfp_individual_la_SOURCES = $(sources)

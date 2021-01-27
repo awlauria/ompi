@@ -26,7 +26,7 @@
 
 # OMPI_CHECK_PSM2(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if PSM2 support can be found.  sets prefix_{CPPFLAGS,
+# check if PSM2 support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_PSM2],[
@@ -40,7 +40,7 @@ AC_DEFUN([OMPI_CHECK_PSM2],[
 				    [Search for PSM (Intel PSM2) libraries in DIR])])
 	OPAL_CHECK_WITHDIR([psm2-libdir], [$with_psm2_libdir], [libpsm2.*])
 
-	ompi_check_psm2_$1_save_CPPFLAGS="$CPPFLAGS"
+	ompi_check_psm2_$1_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
 	ompi_check_psm2_$1_save_LDFLAGS="$LDFLAGS"
 	ompi_check_psm2_$1_save_LIBS="$LIBS"
 
@@ -61,7 +61,7 @@ AC_DEFUN([OMPI_CHECK_PSM2],[
 				  [ompi_check_psm2_happy="no"])],
               [ompi_check_psm2_happy="no"])
 
-	CPPFLAGS="$ompi_check_psm2_$1_save_CPPFLAGS"
+	OPAL_CPPFLAGS="$ompi_check_psm2_$1_save_OPAL_CPPFLAGS"
 	LDFLAGS="$ompi_check_psm2_$1_save_LDFLAGS"
 	LIBS="$ompi_check_psm2_$1_save_LIBS"
 
@@ -89,7 +89,7 @@ AC_DEFUN([OMPI_CHECK_PSM2],[
 
     AS_IF([test "$ompi_check_psm2_happy" = "yes"],
           [$1_LDFLAGS="[$]$1_LDFLAGS $ompi_check_psm2_LDFLAGS"
-	   $1_CPPFLAGS="[$]$1_CPPFLAGS $ompi_check_psm2_CPPFLAGS"
+	   $1_OPAL_CPPFLAGS="[$]$1_OPAL_CPPFLAGS $ompi_check_psm2_OPAL_CPPFLAGS"
 	   $1_LIBS="[$]$1_LIBS $ompi_check_psm2_LIBS"
 	   $2],
           [AS_IF([test ! -z "$with_psm2" && test "$with_psm2" != "no"],

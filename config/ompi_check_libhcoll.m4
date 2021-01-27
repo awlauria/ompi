@@ -13,11 +13,11 @@ dnl
 
 # OMPI_CHECK_HCOLL(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if hcoll support can be found.  sets prefix_{CPPFLAGS,
+# check if hcoll support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_HCOLL],[
-    OPAL_VAR_SCOPE_PUSH([ompi_check_hcoll_dir ompi_check_hcoll_libs ompi_check_hcoll_happy CPPFLAGS_save LDFLAGS_save LIBS_save])
+    OPAL_VAR_SCOPE_PUSH([ompi_check_hcoll_dir ompi_check_hcoll_libs ompi_check_hcoll_happy OPAL_CPPFLAGS_save LDFLAGS_save LIBS_save])
 
     AC_ARG_WITH([hcoll],
         [AC_HELP_STRING([--with-hcoll(=DIR)],
@@ -29,11 +29,11 @@ AC_DEFUN([OMPI_CHECK_HCOLL],[
            AS_IF([test ! -z "$with_hcoll" && test "$with_hcoll" != "yes"],
                  [ompi_check_hcoll_dir=$with_hcoll])
 
-           CPPFLAGS_save=$CPPFLAGS
+           OPAL_CPPFLAGS_save=$OPAL_CPPFLAGS
            LDFLAGS_save=$LDFLAGS
            LIBS_save=$LIBS
 
-           OPAL_LOG_MSG([$1_CPPFLAGS : $$1_CPPFLAGS], 1)
+           OPAL_LOG_MSG([$1_OPAL_CPPFLAGS : $$1_OPAL_CPPFLAGS], 1)
            OPAL_LOG_MSG([$1_LDFLAGS  : $$1_LDFLAGS], 1)
            OPAL_LOG_MSG([$1_LIBS     : $$1_LIBS], 1)
 
@@ -49,14 +49,14 @@ AC_DEFUN([OMPI_CHECK_HCOLL],[
 
            AS_IF([test "$ompi_check_hcoll_happy" = "yes"],
                  [
-                     CPPFLAGS=$coll_hcoll_CPPFLAGS
+                     OPAL_CPPFLAGS=$coll_hcoll_OPAL_CPPFLAGS
                      LDFLAGS=$coll_hcoll_LDFLAGS
                      LIBS=$coll_hcoll_LIBS
                      AC_CHECK_FUNCS(hcoll_context_free, [], [])
                  ],
                  [])
 
-           CPPFLAGS=$CPPFLAGS_save
+           OPAL_CPPFLAGS=$OPAL_CPPFLAGS_save
            LDFLAGS=$LDFLAGS_save
            LIBS=$LIBS_save],
           [ompi_check_hcoll_happy=no])

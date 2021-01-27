@@ -77,4 +77,7 @@ $(nodist_libpmpiext_pcollreq_mpifh_la_SOURCES):
 		$(LN_S) $(top_srcdir)/ompi/mpiext/pcollreq/mpif-h/$$pname $@ ; \
 	fi
 
+nodist_libpmpiext_pcollreq_mpifh_la_CFLAGS = $(OPAL_CFLAGS)
+nodist_libpmpiext_pcollreq_mpifh_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 endif

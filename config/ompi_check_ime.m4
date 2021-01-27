@@ -10,12 +10,12 @@ dnl
 
 # OMPI_CHECK_IME(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if IME support can be found.  sets prefix_{CPPFLAGS,
+# check if IME support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_IME],[
 
-    check_ime_CPPFLAGS=
+    check_ime_OPAL_CPPFLAGS=
     check_ime_LDFLAGS=
     check_ime_LIBS=
 

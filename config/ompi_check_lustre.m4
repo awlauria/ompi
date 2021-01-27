@@ -25,18 +25,18 @@ dnl
 
 # OMPI_CHECK_LUSTRE(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if LUSTRE support can be found.  sets prefix_{CPPFLAGS,
+# check if LUSTRE support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_LUSTRE],[
 
-    check_lustre_CPPFLAGS=
+    check_lustre_OPAL_CPPFLAGS=
     check_lustre_LDFLAGS=
     check_lustre_LIBS=
 
     check_lustre_save_LIBS="$LIBS"
     check_lustre_save_LDFLAGS="$LDFLAGS"
-    check_lustre_save_CPPFLAGS="$CPPFLAGS"
+    check_lustre_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
 
     ompi_check_lustre_happy="yes"
 
@@ -82,7 +82,7 @@ EOF
 
            # Try the compile
            OPAL_LOG_COMMAND(
-               [$CC $CFLAGS -I$ompi_check_lustre_dir/include -c conftest.c],
+               [$CC $OPAL_CFLAGS -I$ompi_check_lustre_dir/include -c conftest.c],
                [ompi_check_lustre_struct_happy="yes"],
                [ompi_check_lustre_struct_happy="no"
                 ompi_check_lustre_happy="no"]

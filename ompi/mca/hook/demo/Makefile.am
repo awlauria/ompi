@@ -18,3 +18,5 @@ noinst_LTLIBRARIES = libmca_hook_demo.la
 
 libmca_hook_demo_la_SOURCES = $(sources)
 libmca_hook_demo_la_LDFLAGS = -module -avoid-version
+libmca_hook_demo_la_CFLAGS  = $(OPAL_CFLAGS)
+libmca_hook_demo_la_CPPFLAGS  = $(OPAL_CPPFLAGS)

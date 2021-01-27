@@ -20,18 +20,18 @@ dnl
 
 # OMPI_CHECK_GPFS(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if GPFS support can be found.  sets prefix_{CPPFLAGS,
+# check if GPFS support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_GPFS],[
 
-    check_gpfs_CPPFLAGS=
+    check_gpfs_OPAL_CPPFLAGS=
     check_gpfs_LDFLAGS=
     check_gpfs_LIBS=
 
     check_gpfs_save_LIBS="$LIBS"
     check_gpfs_save_LDFLAGS="$LDFLAGS"
-    check_gpfs_save_CPPFLAGS="$CPPFLAGS"
+    check_gpfs_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
 
     check_gpfs_configuration="none"
     ompi_check_gpfs_happy="yes"

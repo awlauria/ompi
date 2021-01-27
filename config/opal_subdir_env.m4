@@ -13,7 +13,7 @@ dnl OPAL_SUBDIR_ENV_CLEAN([prefix])
 dnl
 dnl Save all precious variables with the specified prefix and reset
 dnl all precious variables to their state at the start of configure.
-dnl That is, if a precious variable (say CPPFLAGS) was set on the
+dnl That is, if a precious variable (say OPAL_CPPFLAGS) was set on the
 dnl configure command line or in the environment at the start of
 dnl configure, it will be reset to that stored value.  Otherwise, it
 dnl will be unset.  The current state is recorded so that it can be

@@ -66,10 +66,10 @@ AC_DEFUN([OMPI_SETUP_MPI_FORTRAN],[
     # F77 are the same string value (if they're defined).  If they're
     # not, we'll issue a warning, but keep going on the assumption
     # that they're the same back-end compiler (e.g., pgf77 and pgf90).
-    # Open MPI only uses $FC and $FCFLAGS -- $F77 and $FFLAGS are now
+    # Open MPI only uses $FC and $FOPAL_CFLAGS -- $F77 and $FFLAGS are now
     # ignored.
     AS_IF([test "$F77" != "" || test "$FFLAGS" != ""],
-          [AC_MSG_WARN([Open MPI now ignores the F77 and FFLAGS environment variables; only the FC and FCFLAGS environment variables are used.])
+          [AC_MSG_WARN([Open MPI now ignores the F77 and FFLAGS environment variables; only the FC and FOPAL_CFLAGS environment variables are used.])
            sleep 5])
 
     #-----------------------------------------------------------------------

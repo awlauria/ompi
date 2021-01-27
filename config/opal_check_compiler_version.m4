@@ -29,8 +29,8 @@ AC_DEFUN([OPAL_CHECK_COMPILER], [
     lower=m4_tolower($1)
     AC_CACHE_CHECK([for compiler $lower], opal_cv_compiler_[$1],
     [
-            CPPFLAGS_orig=$CPPFLAGS
-            CPPFLAGS="-I${OPAL_TOP_SRCDIR}/opal/include/opal $CPPFLAGS"
+            OPAL_CPPFLAGS_orig=$OPAL_CPPFLAGS
+            OPAL_CPPFLAGS="-I${OPAL_TOP_SRCDIR}/opal/include/opal $OPAL_CPPFLAGS"
             AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +51,7 @@ int main (int argc, char * argv[])
             ], [
                 eval opal_cv_compiler_$1=0
             ])
-            CPPFLAGS=$CPPFLAGS_orig
+            OPAL_CPPFLAGS=$OPAL_CPPFLAGS_orig
     ])
     AC_DEFINE_UNQUOTED([OPAL_BUILD_PLATFORM_COMPILER_$1], $opal_cv_compiler_[$1],
                        [The compiler $lower which OMPI was built with])
@@ -61,8 +61,8 @@ AC_DEFUN([OPAL_CHECK_COMPILER_STRING], [
     lower=m4_tolower($1)
     AC_CACHE_CHECK([for compiler $lower], opal_cv_compiler_[$1],
     [
-            CPPFLAGS_orig=$CPPFLAGS
-            CPPFLAGS="-I${OPAL_TOP_SRCDIR}/opal/include/opal $CPPFLAGS"
+            OPAL_CPPFLAGS_orig=$OPAL_CPPFLAGS
+            OPAL_CPPFLAGS="-I${OPAL_TOP_SRCDIR}/opal/include/opal $OPAL_CPPFLAGS"
             AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,7 +83,7 @@ int main (int argc, char * argv[])
             ], [
                 eval opal_cv_compiler_$1=UNKNOWN
             ])
-            CPPFLAGS=$CPPFLAGS_orig
+            OPAL_CPPFLAGS=$OPAL_CPPFLAGS_orig
     ])
     AC_DEFINE_UNQUOTED([OPAL_BUILD_PLATFORM_COMPILER_$1], $opal_cv_compiler_[$1],
                        [The compiler $lower which OMPI was built with])
@@ -94,8 +94,8 @@ AC_DEFUN([OPAL_CHECK_COMPILER_STRINGIFY], [
     lower=m4_tolower($1)
     AC_CACHE_CHECK([for compiler $lower], opal_cv_compiler_[$1],
     [
-            CPPFLAGS_orig=$CPPFLAGS
-            CPPFLAGS="-I${OPAL_TOP_SRCDIR}/opal/include/opal $CPPFLAGS"
+            OPAL_CPPFLAGS_orig=$OPAL_CPPFLAGS
+            OPAL_CPPFLAGS="-I${OPAL_TOP_SRCDIR}/opal/include/opal $OPAL_CPPFLAGS"
             AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,7 +116,7 @@ int main (int argc, char * argv[])
             ], [
                 eval opal_cv_compiler_$1=UNKNOWN
             ])
-            CPPFLAGS=$CPPFLAGS_orig
+            OPAL_CPPFLAGS=$OPAL_CPPFLAGS_orig
     ])
     AC_DEFINE_UNQUOTED([OPAL_BUILD_PLATFORM_COMPILER_$1], $opal_cv_compiler_[$1],
                        [The compiler $lower which OMPI was built with])

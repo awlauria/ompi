@@ -15,6 +15,9 @@ libmca_hook_la_SOURCES =
 headers = hook.h
 libmca_hook_la_SOURCES += $(headers)
 
+libmca_hook_la_CFLAGS = $(OPAL_CFLAGS)
+libmca_hook_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 # Conditionally install the header files
 if WANT_INSTALL_HEADERS
 ompidir = $(ompiincludedir)/$(subdir)

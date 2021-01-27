@@ -113,7 +113,7 @@ if test "$subdir_dir" != ":" && test -d $srcdir/$subdir_dir; then
     # Construct the --cache-file argument
     #
 
-    # BWB - subdir caching is a pain since we change CFLAGS and all that.
+    # BWB - subdir caching is a pain since we change OPAL_CFLAGS and all that.
     # Just disable it for now
     subdir_cache_file="/dev/null"
 

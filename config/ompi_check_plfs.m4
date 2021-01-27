@@ -23,18 +23,18 @@ dnl
 
 # OMPI_CHECK_PLFS(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if PLFS support can be found.  sets prefix_{CPPFLAGS,
+# check if PLFS support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_PLFS],[
 
-    check_plfs_CPPFLAGS=
+    check_plfs_OPAL_CPPFLAGS=
     check_plfs_LDFLAGS=
     check_plfs_LIBS=
 
     check_plfs_save_LIBS="$LIBS"
     check_plfs_save_LDFLAGS="$LDFLAGS"
-    check_plfs_save_CPPFLAGS="$CPPFLAGS"
+    check_plfs_save_OPAL_CPPFLAGS="$OPAL_CPPFLAGS"
 
     check_plfs_configuration="none"
     ompi_check_plfs_happy="yes"
@@ -60,9 +60,9 @@ AC_DEFUN([OMPI_CHECK_PLFS],[
 
     # Add correct -I and -L flags
     AS_IF([test -d "$with_plfs/include"],
-        [check_plfs_CPPFLAGS="-I$with_plfs/include"
-            $1_CPPFLAGS="$check_plfs_CPPFLAGS"
-            CPPFLAGS="$CPPFLAGS $check_plfs_CPPFLAGS"],
+        [check_plfs_OPAL_CPPFLAGS="-I$with_plfs/include"
+            $1_OPAL_CPPFLAGS="$check_plfs_OPAL_CPPFLAGS"
+            OPAL_CPPFLAGS="$OPAL_CPPFLAGS $check_plfs_OPAL_CPPFLAGS"],
 	[ompi_check_plfs_happy="no"])
 
     AS_IF([test "$ompi_check_plfs_happy" = "yes"],
@@ -99,7 +99,7 @@ AC_DEFUN([OMPI_CHECK_PLFS],[
 
 
     LDFLAGS="$check_plfs_save_LDFLAGS"
-    CPPFLAGS="$check_plfs_save_CPPFLAGS"
+    OPAL_CPPFLAGS="$check_plfs_save_OPAL_CPPFLAGS"
     LIBS="$check_plfs_save_LIBS"
     AS_IF([test "$ompi_check_plfs_happy" = "yes"],
           [$2],

@@ -40,4 +40,6 @@ noinst_HEADERS = mpiext_example_usempif08.h
 # Sources for the convenience libtool library.
 libmpiext_example_usempif08_la_SOURCES = mpiext_example_progress_f08.F90
 libmpiext_example_usempif08_la_LDFLAGS = -module -avoid-version
+libmpiext_example_usempif08_la_CFLAGS = $(OPAL_CFLAGS)
+libmpiext_example_usempif08_la_CPPFLAGS = $(OPAL_CPPFLAGS)
 endif

@@ -21,11 +21,11 @@ dnl     arguments to FI_VERSION()
 dnl $2: action if OFI API version is >= $1
 dnl $3: action if OFI API version is < $1
 AC_DEFUN([OPAL_CHECK_OFI_VERSION_GE],[
-    OPAL_VAR_SCOPE_PUSH([opal_ofi_ver_ge_save_CPPFLAGS opal_ofi_ver_ge_happy])
+    OPAL_VAR_SCOPE_PUSH([opal_ofi_ver_ge_save_OPAL_CPPFLAGS opal_ofi_ver_ge_happy])
 
     AC_MSG_CHECKING([if OFI API version number is >= $1])
-    opal_ofi_ver_ge_save_CPPFLAGS=$CPPFLAGS
-    CPPFLAGS=$opal_ofi_CPPFLAGS
+    opal_ofi_ver_ge_save_OPAL_CPPFLAGS=$OPAL_CPPFLAGS
+    OPAL_CPPFLAGS=$opal_ofi_OPAL_CPPFLAGS
 
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <rdma/fabric.h>]],
 [[
@@ -44,7 +44,7 @@ AC_DEFUN([OPAL_CHECK_OFI_VERSION_GE],[
           [AC_MSG_RESULT([no])
            $3])
 
-    CPPFLAGS=$opal_ofi_ver_ge_save_CPPFLAGS
+    OPAL_CPPFLAGS=$opal_ofi_ver_ge_save_OPAL_CPPFLAGS
 
     OPAL_VAR_SCOPE_POP
 ])dnl
@@ -56,7 +56,7 @@ dnl Do the real work of checking for OFI libfabric.
 dnl Upon return:
 dnl
 dnl - opal_ofi_happy: will be "yes" or "no"
-dnl - opal_ofi_{CPPFLAGS|LDFLAGS|LIBS} will be loaded (if relevant)
+dnl - opal_ofi_{OPAL_CPPFLAGS|LDFLAGS|LIBS} will be loaded (if relevant)
 dnl
 AC_DEFUN([_OPAL_CHECK_OFI],[
     # Add --with options
@@ -89,8 +89,8 @@ AC_DEFUN([_OPAL_CHECK_OFI],[
     OPAL_CHECK_WITHDIR([ofi-libdir], [$with_ofi_libdir],
                        [libfabric.*])
 
-    OPAL_VAR_SCOPE_PUSH([opal_check_ofi_save_CPPFLAGS opal_check_ofi_save_LDFLAGS opal_check_ofi_save_LIBS opal_check_fi_info_pci])
-    opal_check_ofi_save_CPPFLAGS=$CPPFLAGS
+    OPAL_VAR_SCOPE_PUSH([opal_check_ofi_save_OPAL_CPPFLAGS opal_check_ofi_save_LDFLAGS opal_check_ofi_save_LIBS opal_check_fi_info_pci])
+    opal_check_ofi_save_OPAL_CPPFLAGS=$OPAL_CPPFLAGS
     opal_check_ofi_save_LDFLAGS=$LDFLAGS
     opal_check_ofi_save_LIBS=$LIBS
     opal_check_fi_info_pci=0
@@ -121,7 +121,7 @@ AC_DEFUN([_OPAL_CHECK_OFI],[
                               [],
                               [opal_ofi_happy=no])])
 
-    CPPFLAGS="$CPPFLAGS $opal_ofi_CPPFLAGS"
+    OPAL_CPPFLAGS="$OPAL_CPPFLAGS $opal_ofi_OPAL_CPPFLAGS"
 
     AS_IF([test $opal_ofi_happy = yes],
           [AC_CHECK_MEMBER([struct fi_info.nic],
@@ -138,11 +138,11 @@ AC_DEFUN([_OPAL_CHECK_OFI],[
                    [],
                    [#include <pmix.h>])
 
-    CPPFLAGS=$opal_check_ofi_save_CPPFLAGS
+    OPAL_CPPFLAGS=$opal_check_ofi_save_OPAL_CPPFLAGS
     LDFLAGS=$opal_check_ofi_save_LDFLAGS
     LIBS=$opal_check_ofi_save_LIBS
 
-    AC_SUBST([opal_ofi_CPPFLAGS])
+    AC_SUBST([opal_ofi_OPAL_CPPFLAGS])
     AC_SUBST([opal_ofi_LDFLAGS])
     AC_SUBST([opal_ofi_LIBS])
 

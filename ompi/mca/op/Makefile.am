@@ -24,6 +24,8 @@ libmca_op_la_SOURCES =
 # local files
 headers = op.h
 libmca_op_la_SOURCES += $(headers)
+libmca_op_la_CFLAGS += $(OPAL_CFLAGS)
+libmca_op_la_CPPFLAGS += $(OPAL_CPPFLAGS)
 
 # Conditionally install the header files
 if WANT_INSTALL_HEADERS

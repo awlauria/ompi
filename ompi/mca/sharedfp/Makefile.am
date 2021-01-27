@@ -28,6 +28,9 @@ libmca_sharedfp_la_SOURCES =
 headers = sharedfp.h
 libmca_sharedfp_la_SOURCES += $(headers)
 
+libmca_sharedfp_la_CFLAGS = $(OPAL_CFLAGS)
+libmca_sharedfp_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 # Conditionally install the header files
 if WANT_INSTALL_HEADERS
 ompidir = $(ompiincludedir)/$(subdir)

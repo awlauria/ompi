@@ -75,6 +75,9 @@ mcacomponent_LTLIBRARIES = $(component_install)
 mca_pml_ob1_la_SOURCES = $(ob1_sources)
 mca_pml_ob1_la_LDFLAGS = -module -avoid-version
 
+mca_pml_ob1_la_CFLAGS = $(OPAL_CFLAGS)
+mca_pml_ob1_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 if OPAL_cuda_support
 mca_pml_ob1_la_LIBADD = $(top_builddir)/ompi/lib@OMPI_LIBMPI_NAME@.la \
     $(OMPI_TOP_BUILDDIR)/opal/mca/common/cuda/lib@OPAL_LIB_PREFIX@mca_common_cuda.la

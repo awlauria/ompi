@@ -45,6 +45,9 @@ libmpiext_affinity_c_la_SOURCES = \
         mpiext_affinity_str.c
 libmpiext_affinity_c_la_LDFLAGS = -module -avoid-version
 
+libmpiext_affinity_c_la_CFLAGS = $(OPAL_CFLAGS)
+libmpiext_affinity_c_la_CPPFLAGS = $(OPAL_CPPFLAGS)
+
 # Man page installation
 nodist_man_MANS = OMPI_Affinity_str.3
 

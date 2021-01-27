@@ -26,20 +26,20 @@ dnl         embedded builds.  This is used by PRRTE, but should not
 dnl         be used by new code.
 dnl   * opal_libevent_mode - either external or internal.  If internal,
 dnl         --with-libevent should be ignored by other packages
-dnl   * opal_libevent_CPPFLAGS - the C Preprocessor flags necessary to
+dnl   * opal_libevent_OPAL_CPPFLAGS - the C Preprocessor flags necessary to
 dnl         run the preprocessor on a file which relies on Libevent
-dnl         headers.  This will be folded into the global CPPFLAGS,
+dnl         headers.  This will be folded into the global OPAL_CPPFLAGS,
 dnl         so most people should never need this.
 dnl   * opal_libevent_LDFLAGS - the linker flags necessary to run the
 dnl         linker on a file which relies on Libevent libraries.  This
-dnl         will be folded into the global CPPFLAGS, so most people
+dnl         will be folded into the global OPAL_CPPFLAGS, so most people
 dnl         should never need this.
 dnl   * opal_libevent_LIBS - the libraries necessary to link source which
 dnl         uses Libevent.  Cannot be added to LIBS yet, because then
 dnl         other execution tests later in configure (there are sadly
 dnl         some) would fail if the path in LDFLAGS was not added to
 dnl         LD_LIBRARY_PATH.
-dnl   * CPPFLAGS, LDFLAGS - Updated opal_libevent_CPPFLAGS and
+dnl   * OPAL_CPPFLAGS, LDFLAGS - Updated opal_libevent_OPAL_CPPFLAGS and
 dnl         opal_libevent_LDFLAGS.
 AC_DEFUN([OPAL_CONFIG_LIBEVENT], [
     OPAL_VAR_SCOPE_PUSH([internal_libevent_happy external_libevent_happy])
@@ -89,9 +89,9 @@ dnl
 dnl only safe to call from OPAL_CONFIG_LIBEVENT, assumes variables
 dnl from there are set.
 AC_DEFUN([_OPAL_CONFIG_LIBEVENT_EXTERNAL], [
-    OPAL_VAR_SCOPE_PUSH([opal_libevent_CPPFLAGS_save opal_libevent_LDFLAGS_save opal_libevent_LIBS_save opal_libevent_external_support])
+    OPAL_VAR_SCOPE_PUSH([opal_libevent_OPAL_CPPFLAGS_save opal_libevent_LDFLAGS_save opal_libevent_LIBS_save opal_libevent_external_support])
 
-    opal_libevent_CPPFLAGS_save=$CPPFLAGS
+    opal_libevent_OPAL_CPPFLAGS_save=$OPAL_CPPFLAGS
     opal_libevent_LDFLAGS_save=$LDFLAGS
     opal_libevent_LIBS_save=$LIBS
 
@@ -110,7 +110,7 @@ AC_DEFUN([_OPAL_CONFIG_LIBEVENT_EXTERNAL], [
                        [opal_libevent_external_support=no])
 
     # need these set for the tests below.  If things fail, will undo at the end.
-    CPPFLAGS="$opal_libevent_CPPFLAGS_save $opal_libevent_CPPFLAGS"
+    OPAL_CPPFLAGS="$opal_libevent_OPAL_CPPFLAGS_save $opal_libevent_OPAL_CPPFLAGS"
     LDFLAGS="$opal_libevent_LDFLAGS_save $opal_libevent_LDFLAGS"
     LIBS="$opal_libevent_LIBS_save $opal_libevent_LIBS"
 
@@ -159,7 +159,7 @@ AC_DEFUN([_OPAL_CONFIG_LIBEVENT_EXTERNAL], [
 
     AS_IF([test "$opal_libevent_external_support" = "yes"],
           [$1],
-          [CPPFLAGS="$opal_libevent_CPPFLAGS_save"
+          [OPAL_CPPFLAGS="$opal_libevent_OPAL_CPPFLAGS_save"
            $2])
 
     OPAL_VAR_SCOPE_POP
@@ -194,8 +194,8 @@ AC_DEFUN([_OPAL_CONFIG_LIBEVENT_INTERNAL], [
          # note: because we only ship/commit a tarball (and not the source
          # directory), the source is always expanded in the builddir, so we
          # only need to add a -I to the builddir.
-         opal_libevent_CPPFLAGS="-I$OMPI_TOP_BUILDDIR/$internal_libevent_location -I$OMPI_TOP_BUILDDIR/$internal_libevent_location/include"
-         CPPFLAGS="$CPPFLAGS $opal_libevent_CPPFLAGS"
+         opal_libevent_OPAL_CPPFLAGS="-I$OMPI_TOP_BUILDDIR/$internal_libevent_location -I$OMPI_TOP_BUILDDIR/$internal_libevent_location/include"
+         OPAL_CPPFLAGS="$OPAL_CPPFLAGS $opal_libevent_OPAL_CPPFLAGS"
          # No need to update LDFLAGS, because they will install into
          # our tree and in the mean time are referenced by their .la
          # files.

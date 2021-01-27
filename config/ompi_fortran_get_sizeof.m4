@@ -64,8 +64,8 @@ void $ompi_ac_size_fn(char *a, char *b)
 #endif
 EOF
 
-         OPAL_LOG_COMMAND([$CC $CFLAGS -I. -c conftest.c],
-             [OPAL_LOG_COMMAND([$FC $FCFLAGS $FCFLAGS_f90 conftestf.f90 conftest.o -o conftest $LDFLAGS $LIBS],
+         OPAL_LOG_COMMAND([$CC $OPAL_CFLAGS -I. -c conftest.c],
+             [OPAL_LOG_COMMAND([$FC $FOPAL_CFLAGS $FOPAL_CFLAGS_f90 conftestf.f90 conftest.o -o conftest $LDFLAGS $LIBS],
                   [happy="yes"], [happy="no"])], [happy="no"])
 
          if test "$happy" = "no" ; then

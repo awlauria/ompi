@@ -23,12 +23,12 @@ dnl
 
 # OMPI_CHECK_PVFS2(prefix, [action-if-found], [action-if-not-found])
 # --------------------------------------------------------
-# check if PVFS2 support can be found.  sets prefix_{CPPFLAGS,
+# check if PVFS2 support can be found.  sets prefix_{OPAL_CPPFLAGS,
 # LDFLAGS, LIBS} as needed and runs action-if-found if there is
 # support, otherwise executes action-if-not-found
 AC_DEFUN([OMPI_CHECK_PVFS2],[
 
-    check_pvfs2_CPPFLAGS=
+    check_pvfs2_OPAL_CPPFLAGS=
     check_pvfs2_LDFLAGS=
     check_pvfs2_LIBS=
 
