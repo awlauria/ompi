@@ -48,6 +48,9 @@ int mca_btl_sm_get_xpmem (mca_btl_base_module_t *btl, mca_btl_base_endpoint_t *e
     mca_rcache_base_registration_t *reg;
     void *rem_ptr;
 
+    BTL_VERBOSE(("mca_btl_sm_get_xpmem called with remote address 0x%" PRIx64 ", size %" PRIsize_t,
+                 remote_address, size));
+
     /* silence warning about unused arguments */
     (void) local_handle;
     (void) remote_handle;
