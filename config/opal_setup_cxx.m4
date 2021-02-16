@@ -129,74 +129,18 @@ AC_DEFUN([_OPAL_SETUP_CXX_COMPILER_BACKEND],[
     # These flags are generally g++-specific; even the g++-impersonating
     # compilers won't accept them.
     OPAL_CXXFLAGS_BEFORE_PICKY="$CXXFLAGS"
-    if test "$WANT_PICKY_COMPILER" = 1 && test "$opal_cxx_vendor" = "gnu"; then
-        add="-Wall -Wundef -Wno-long-long"
-
-        # see if -Wno-long-double works...
+    if test "$WANT_PICKY_COMPILER" = 1; then
         AC_LANG_PUSH(C++)
-        CXXFLAGS_orig="$CXXFLAGS"
-        CXXFLAGS="$CXXFLAGS $add -Wno-long-double -fstrict-prototype"
-        AC_CACHE_CHECK([if $CXX supports -Wno-long-double],
-            [opal_cv_cxx_wno_long_double],
-            [AC_TRY_COMPILE([], [],
-                [
-                 dnl So -Wno-long-double did not produce any errors...
-                 dnl We will try to extract a warning regarding
-                 dnl unrecognized or ignored options
-                 AC_TRY_COMPILE([], [long double test;],
-                     [
-                      opal_cv_cxx_wno_long_double="yes"
-                      if test -s conftest.err ; then
-                          dnl Yes, it should be "ignor", in order to catch ignoring and ignore
-                          for i in unknown invalid ignor unrecognized 'not supported'; do
-                              $GREP -iq $i conftest.err
-                              if test "$?" = "0" ; then
-                                  opal_cv_cxx_wno_long_double="no"
-                                  break;
-                              fi
-                          done
-                      fi
-                     ],
-                     [opal_cv_cxx_wno_long_double="no"])],
-                [opal_cv_cxx_wno_long_double="no"])
-            ])
-
-        CXXFLAGS="$CXXFLAGS_orig"
+        _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wundef, Wundef)
+        _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wno-long-long, Wno_long_long, int main() { long long x; } )
+        _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wno-long-double, Wno_long_double, int main () { long double x; })
+        _OPAL_CHECK_SPECIFIC_CXXFLAGS(-fstrict-prototype, fstrict_prototype)
+        _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wall, Wall)
         AC_LANG_POP(C++)
-        if test "$opal_cv_cxx_wno_long_double" = "yes" ; then
-            add="$add -Wno-long-double"
-        fi
-
-        CXXFLAGS="$CXXFLAGS $add"
         OPAL_FLAGS_UNIQ(CXXFLAGS)
-        if test "$add" != "" ; then
-            AC_MSG_WARN([$add has been added to CXXFLAGS (--enable-picky)])
-        fi
-        unset add
     fi
 
-    # See if this version of g++ allows -finline-functions
-    if test "$GXX" = "yes"; then
-        CXXFLAGS_orig="$CXXFLAGS"
-        CXXFLAGS="$CXXFLAGS -finline-functions"
-        add=
-        AC_LANG_PUSH(C++)
-        AC_CACHE_CHECK([if $CXX supports -finline-functions],
-                   [opal_cv_cxx_finline_functions],
-                   [AC_TRY_COMPILE([], [],
-                                   [opal_cv_cxx_finline_functions="yes"],
-                                   [opal_cv_cxx_finline_functions="no"])])
-        AC_LANG_POP(C++)
-        if test "$opal_cv_cxx_finline_functions" = "yes" ; then
-            add=" -finline-functions"
-        fi
-        CXXFLAGS="$CXXFLAGS_orig$add"
-        OPAL_FLAGS_UNIQ(CXXFLAGS)
-        if test "$add" != "" ; then
-            AC_MSG_WARN([$add has been added to CXXFLAGS])
-        fi
-        unset add
-    fi
+    _OPAL_CHECK_SPECIFIC_CXXFLAGS(-finline-functions, finline_functions)
 
     # Make sure we can link with the C compiler
     if test "$opal_cv_cxx_compiler_vendor" != "microsoft"; then
