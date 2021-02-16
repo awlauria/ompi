@@ -111,6 +111,7 @@ AC_DEFUN([OPAL_PROG_CC_C11],[
                     break
                 fi
             done
+
         else
             AC_MSG_NOTICE([no flag required for C11 support])
             opal_cv_c11_supported=yes
@@ -173,9 +174,19 @@ AC_DEFUN([OPAL_SETUP_CC],[
             AC_MSG_ERROR([Aborting.])
         fi
 
+        # Silence typeof xlc warning.
+        if test "$opal_c_vendor" = "ibm"; then
+            CFLAGS="$CFLAGS -qlanglvl=extc99"
+        fi
+
         # Get the correct result for C11 support flags now that the compiler flags have
         # changed
         OPAL_PROG_CC_C11_HELPER([], [], [])
+    else
+        # Silence typeof xlc warning.
+        if test "$opal_c_vendor" = "ibm"; then
+            CFLAGS="$CFLAGS -qlanglvl=extc1x"
+        fi
     fi
 
     # Check if compiler support __thread
