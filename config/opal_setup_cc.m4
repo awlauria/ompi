@@ -305,15 +305,6 @@ AC_DEFUN([OPAL_SETUP_CC],[
         _OPAL_CHECK_SPECIFIC_CFLAGS(-Wmissing-prototypes, Wmissing_prototypes)
         _OPAL_CHECK_SPECIFIC_CFLAGS(-Wstrict-prototypes, Wstrict_prototypes)
         _OPAL_CHECK_SPECIFIC_CFLAGS(-Wcomment, Wcomment)
-        # Note: Some versions of clang (at least >= 3.5 -- perhaps
-        # older versions, too?) and xlc with -g (v16.1, perhaps older)
-        # will *warn* about -finline-functions, but still allow it.
-        # This is very annoying, so check for that warning, too.
-        # The clang warning looks like this:
-        # clang: warning: optimization flag '-finline-functions' is not supported
-        # clang: warning: argument unused during compilation: '-finline-functions'
-        # the xlc warning looks like this:
-        # warning: "-qinline" is not compatible with "-g". "-qnoinline" is being set.
         _OPAL_CHECK_SPECIFIC_CFLAGS(-Werror-implicit-function-declaration, Werror_implicit_function_declaration)
         _OPAL_CHECK_SPECIFIC_CFLAGS(-Wno-long-double, Wno_long_double, int main() { long double x; })
         _OPAL_CHECK_SPECIFIC_CFLAGS(-fno-strict-aliasing, fno_strict_aliasing, int main() { long double x; })
@@ -321,6 +312,15 @@ AC_DEFUN([OPAL_SETUP_CC],[
         _OPAL_CHECK_SPECIFIC_CFLAGS(-Wall, Wall)
     fi
 
+    # Note: Some versions of clang (at least >= 3.5 -- perhaps
+    # older versions, too?) and xlc with -g (v16.1, perhaps older)
+    # will *warn* about -finline-functions, but still allow it.
+    # This is very annoying, so check for that warning, too.
+    # The clang warning looks like this:
+    # clang: warning: optimization flag '-finline-functions' is not supported
+    # clang: warning: argument unused during compilation: '-finline-functions'
+    # the xlc warning looks like this:
+    # warning: "-qinline" is not compatible with "-g". "-qnoinline" is being set.
     _OPAL_CHECK_SPECIFIC_CFLAGS(-finline-functions, finline_functions)
 
     # Try to enable restrict keyword
@@ -336,9 +336,6 @@ AC_DEFUN([OPAL_SETUP_CC],[
     if test ! -z "$RESTRICT_CFLAGS" ; then
         _OPAL_CHECK_SPECIFIC_CFLAGS($RESTRICT_CFLAGS, restrict)
     fi
-
-    OPAL_FLAGS_UNIQ([CFLAGS])
-    AC_MSG_RESULT(CFLAGS result: $CFLAGS)
 
     # see if the C compiler supports __builtin_expect
     AC_CACHE_CHECK([if $CC supports __builtin_expect],
@@ -413,6 +410,8 @@ AC_DEFUN([OPAL_SETUP_CC],[
     OPAL_ENSURE_CONTAINS_OPTFLAGS(["$CFLAGS"])
     AC_MSG_RESULT([$co_result])
     CFLAGS="$co_result"
+    OPAL_FLAGS_UNIQ([CFLAGS])
+    AC_MSG_RESULT(CFLAGS result: $CFLAGS)
     OPAL_VAR_SCOPE_POP
 ])
 

@@ -88,15 +88,15 @@ AC_DEFUN([_OPAL_SETUP_CXX_COMPILER],[
 # VERSION file at the base of our source directory on case-
 # insensitive filesystems.
 AC_DEFUN([OPAL_CHECK_CXX_IQUOTE],[
-    OPAL_VAR_SCOPE_PUSH([opal_check_cxx_iquote_CFLAGS_save])
-    opal_check_cxx_iquote_CFLAGS_save=${CFLAGS}
-    CXXFLAGS="${CFLAGS} -iquote ."
+    OPAL_VAR_SCOPE_PUSH([opal_check_cxx_iquote_CXXFLAGS_save])
+    opal_check_cxx_iquote_CXXFLAGS_save=${CXXFLAGS}
+    CXXFLAGS="${CXXFLAGS} -iquote ."
     AC_MSG_CHECKING([for $CXX option to add a directory only to the search path for the quote form of include])
     AC_LANG_PUSH(C++)
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[])],
 		      [opal_cxx_iquote="-iquote"],
 		      [opal_cxx_iquote="-I"])
-    CXXFLAGS=${opal_check_cxx_iquote_CFLAGS_save}
+    CXXFLAGS=${opal_check_cxx_iquote_CXXFLAGS_save}
     AC_LANG_POP(C++)
     OPAL_VAR_SCOPE_POP
     AC_MSG_RESULT([$opal_cxx_iquote])
@@ -106,10 +106,13 @@ AC_DEFUN([OPAL_CHECK_CXX_IQUOTE],[
 # ----------------------------------
 # Back end of _OPAL_SETUP_CXX_COMPILER_BACKEND()
 AC_DEFUN([_OPAL_SETUP_CXX_COMPILER_BACKEND],[
+    AC_LANG_PUSH(C++)
+    OPAL_CHECK_CXX_IQUOTE
+
     # Do we want code coverage
     if test "$WANT_COVERAGE" = "1"; then
         if test "$opal_cxx_vendor" = "gnu" ; then
-            AC_MSG_WARN([$OPAL_COVERAGE_FLAGS has been added to CFLAGS (--enable-coverage)])
+            AC_MSG_WARN([$OPAL_COVERAGE_FLAGS has been added to CXXFLAGS (--enable-coverage)])
             WANT_DEBUG=1
             CXXFLAGS="${CXXFLAGS} $OPAL_COVERAGE_FLAGS"
             OPAL_WRAPPER_FLAGS_ADD([CXXFLAGS], [$OPAL_COVERAGE_FLAGS])
@@ -122,22 +125,22 @@ AC_DEFUN([_OPAL_SETUP_CXX_COMPILER_BACKEND],[
     # Do we want debugging?
     if test "$WANT_DEBUG" = "1" && test "$enable_debug_symbols" != "no" ; then
         CXXFLAGS="$CXXFLAGS -g"
-        OPAL_FLAGS_UNIQ(CXXFLAGS)
         AC_MSG_WARN([-g has been added to CXXFLAGS (--enable-debug)])
+    fi
+
+    if test "$WANT_DEBUG"  = "0" ; then
+        OPAL_ENSURE_CONTAINS_OPTFLAGS(["$CXXFLAGS"])
     fi
 
     # These flags are generally g++-specific; even the g++-impersonating
     # compilers won't accept them.
     OPAL_CXXFLAGS_BEFORE_PICKY="$CXXFLAGS"
     if test "$WANT_PICKY_COMPILER" = 1; then
-        AC_LANG_PUSH(C++)
         _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wundef, Wundef)
         _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wno-long-long, Wno_long_long, int main() { long long x; } )
         _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wno-long-double, Wno_long_double, int main () { long double x; })
         _OPAL_CHECK_SPECIFIC_CXXFLAGS(-fstrict-prototype, fstrict_prototype)
         _OPAL_CHECK_SPECIFIC_CXXFLAGS(-Wall, Wall)
-        AC_LANG_POP(C++)
-        OPAL_FLAGS_UNIQ(CXXFLAGS)
     fi
 
     _OPAL_CHECK_SPECIFIC_CXXFLAGS(-finline-functions, finline_functions)
@@ -149,7 +152,7 @@ AC_DEFUN([_OPAL_SETUP_CXX_COMPILER_BACKEND],[
 **********************************************************************
 * It appears that your C++ compiler is unable to link against object
 * files created by your C compiler.  This generally indicates either
-* a conflict between the options specified in CFLAGS and CXXFLAGS
+* a conflict between the options specified in CXXFLAGS
 * or a problem with the local compiler installation.  More
 * information (including exactly what command was given to the
 * compilers and what error resulted when the commands were executed) is
@@ -182,17 +185,19 @@ EOF
         fi
     fi
 
-    # config/opal_ensure_contains_optflags.m4
-    OPAL_ENSURE_CONTAINS_OPTFLAGS(["$CXXFLAGS"])
-    AC_MSG_CHECKING([for C++ optimization flags])
-    AC_MSG_RESULT([$co_result])
-    CXXFLAGS="$co_result"
 
     # bool type size and alignment
-    AC_LANG_PUSH(C++)
     AC_CHECK_SIZEOF(bool)
     OPAL_C_GET_ALIGNMENT(bool, OPAL_ALIGNMENT_CXX_BOOL)
-    AC_LANG_POP(C++)
 
-    OPAL_CHECK_CXX_IQUOTE
+    OPAL_ENSURE_CONTAINS_OPTFLAGS("$OPAL_CXXFLAGS_BEFORE_PICKY")
+    OPAL_CXXFLAGS_BEFORE_PICKY="$co_result"
+
+    AC_MSG_CHECKING([for CXX optimization flags])
+    OPAL_ENSURE_CONTAINS_OPTFLAGS(["$CXXFLAGS"])
+    AC_MSG_RESULT([$co_result])
+    CXXFLAGS="$co_result"
+    OPAL_FLAGS_UNIQ([CXXFLAGS])
+    AC_MSG_RESULT(CXXFLAGS result: $CXXFLAGS)
+    AC_LANG_POP(C++)
 ])
