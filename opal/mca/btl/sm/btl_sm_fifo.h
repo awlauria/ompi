@@ -71,6 +71,7 @@ typedef struct sm_fifo_t {
     atomic_fifo_value_t fifo_head;
     atomic_fifo_value_t fifo_tail;
     opal_atomic_int32_t fbox_available;
+    size_t size;
 } sm_fifo_t;
 
 /* large enough to ensure the fifo is on its own cache line */
@@ -120,19 +121,19 @@ static inline mca_btl_sm_hdr_t *sm_fifo_read (sm_fifo_t *fifo, struct mca_btl_ba
     mca_btl_sm_hdr_t *hdr;
     fifo_value_t value;
 
-    if (SM_FIFO_FREE == fifo->fifo_head) {
+    if (SM_FIFO_FREE == fifo->fifo_head || fifo->size == 0) {
         return NULL;
     }
 
-    opal_atomic_rmb ();
+    opal_atomic_wmb ();
 
     value = fifo->fifo_head;
 
     *ep = &mca_btl_sm_component.endpoints[value >> MCA_BTL_SM_OFFSET_BITS];
+    fprintf(stderr, "%lu = value\n", value);
     hdr = (mca_btl_sm_hdr_t *) relative2virtual (value);
-
+    fprintf(stderr, "tag = %d, len = %d\n", hdr->tag, hdr->len);
     fifo->fifo_head = SM_FIFO_FREE;
-
     assert (hdr->next != value);
 
     if (OPAL_UNLIKELY(SM_FIFO_FREE == hdr->next)) {
@@ -149,6 +150,8 @@ static inline mca_btl_sm_hdr_t *sm_fifo_read (sm_fifo_t *fifo, struct mca_btl_ba
         fifo->fifo_head = hdr->next;
     }
 
+    fifo->size--;
+    fprintf(stderr, "size now: = %d\n", fifo->size);
     opal_atomic_wmb ();
     return hdr;
 }
@@ -161,13 +164,13 @@ static inline void sm_fifo_init (sm_fifo_t *fifo)
     fifo->fifo_head = SM_FIFO_FREE;
     fifo->fifo_tail = SM_FIFO_FREE;
     fifo->fbox_available = mca_btl_sm_component.fbox_max;
+    fifo->size = 0;
     mca_btl_sm_component.my_fifo = fifo;
 }
 
 static inline void sm_fifo_write (sm_fifo_t *fifo, fifo_value_t value)
 {
-    fifo_value_t prev;
-
+    fifo_value_t prev = 0;
     opal_atomic_wmb ();
     prev = sm_item_swap (&fifo->fifo_tail, value);
     opal_atomic_rmb ();
@@ -176,11 +179,13 @@ static inline void sm_fifo_write (sm_fifo_t *fifo, fifo_value_t value)
 
     if (OPAL_LIKELY(SM_FIFO_FREE != prev)) {
         mca_btl_sm_hdr_t *hdr = (mca_btl_sm_hdr_t *) relative2virtual (prev);
+        //memset(hdr, 0, sizeof(mca_btl_sm_hdr_t));
         hdr->next = value;
     } else {
         fifo->fifo_head = value;
     }
 
+    fifo->size++;
     opal_atomic_wmb ();
 }
 

@@ -64,6 +64,7 @@ static inline void mca_btl_sm_fbox_set_header (mca_btl_sm_fbox_hdr_t *hdr, uint1
     hdr->data_i32.value0 = size;
     opal_atomic_wmb ();
     hdr->data_i32.value1 = tmp.data_i32.value1;
+    opal_atomic_wmb ();
 }
 
 static inline mca_btl_sm_fbox_hdr_t mca_btl_sm_fbox_read_header (mca_btl_sm_fbox_hdr_t *hdr)
@@ -109,8 +110,8 @@ static inline bool mca_btl_sm_fbox_sendi (mca_btl_base_endpoint_t *ep, unsigned 
 
     if (OPAL_UNLIKELY(buffer_free < size)) {
         /* check if we need to free up space for this fragment */
-        BTL_VERBOSE(("not enough room for a fragment of size %u. in use buffer segment: {start: %x, end: %x, high bit matches: %d}",
-                     (unsigned) size, start, end, (int) hbm));
+        fprintf(stderr,"not enough room for a fragment of size %u. in use buffer segment: {start: %x, end: %x, high bit matches: %d}\n",
+                     (unsigned) size, start, end, (int) hbm);
 
         /* read the current start pointer from the remote peer and recalculate the available buffer space */
         start = ep->fbox_out.start = ep->fbox_out.startp[0];
@@ -125,7 +126,7 @@ static inline bool mca_btl_sm_fbox_sendi (mca_btl_base_endpoint_t *ep, unsigned 
         /* if this is the end of the buffer and the fragment doesn't fit then mark the remaining buffer space to
          * be skipped and check if the fragment can be written at the beginning of the buffer. */
         if (OPAL_UNLIKELY(buffer_free > 0 && buffer_free < size && start <= end)) {
-            BTL_VERBOSE(("message will not fit in remaining buffer space. skipping to beginning"));
+            fprintf(stderr, "message will not fit in remaining buffer space. skipping to beginning\n");
 
             mca_btl_sm_fbox_set_header (MCA_BTL_SM_FBOX_HDR(dst), 0xff, ep->fbox_out.seq++,
                                         buffer_free - sizeof (mca_btl_sm_fbox_hdr_t));
@@ -145,10 +146,6 @@ static inline bool mca_btl_sm_fbox_sendi (mca_btl_base_endpoint_t *ep, unsigned 
             return false;
         }
     }
-
-    BTL_VERBOSE(("writing fragment of size %u to offset %u {start: 0x%x, end: 0x%x (hbs: %d)} of peer's buffer. free = %u",
-                 (unsigned int) size, end, start, end, hbs, buffer_free));
-
     data = dst + sizeof (mca_btl_sm_fbox_hdr_t);
 
     memcpy (data, header, header_size);
@@ -160,6 +157,7 @@ static inline bool mca_btl_sm_fbox_sendi (mca_btl_base_endpoint_t *ep, unsigned 
     end += size;
 
     if (OPAL_UNLIKELY(fbox_size == end)) {
+        fprintf(stderr, "AT THE END\n");
         /* toggle the high bit */
         hbs = !hbs;
         /* reset the end pointer to the beginning of the buffer */
@@ -168,11 +166,16 @@ static inline bool mca_btl_sm_fbox_sendi (mca_btl_base_endpoint_t *ep, unsigned 
         MCA_BTL_SM_FBOX_HDR(ep->fbox_out.buffer + end)->ival = 0;
     }
 
-    /* write out part of the header now. the tag will be written when the data is available */
-    mca_btl_sm_fbox_set_header (MCA_BTL_SM_FBOX_HDR(dst), tag, ep->fbox_out.seq++, data_size);
+    fprintf(stderr,"writing fragment with tag %u seq %u size %u to offset %u {start: 0x%x, end: 0x%x (hbs: %d)} of peer's buffer. free = %u\n",
+                 tag, ep->fbox_out.seq, (unsigned int) size, end, start, end, hbs, buffer_free);
+
 
     /* align the buffer */
     ep->fbox_out.end = ((uint32_t) hbs << 31) | end;
+    /* write out part of the header now. the tag will be written when the data is available */
+    mca_btl_sm_fbox_set_header (MCA_BTL_SM_FBOX_HDR(dst), tag, ep->fbox_out.seq++, data_size);
+
+
     opal_atomic_wmb ();
     OPAL_THREAD_UNLOCK(&ep->lock);
 
@@ -203,10 +206,10 @@ static inline bool mca_btl_sm_check_fboxes (void)
             ++ep->fbox_in.seq;
 
             /* force all prior reads to complete before continuing */
-            opal_atomic_rmb ();
+            opal_atomic_wmb ();
 
-            BTL_VERBOSE(("got frag from %d with header {.tag = %d, .size = %d, .seq = %u} from offset %u",
-                         ep->peer_smp_rank, hdr.data.tag, hdr.data.size, hdr.data.seq, start));
+            fprintf(stderr, "got frag from %d with header {.tag = %d, .size = %d, .seq = %u} from offset %u\n",
+                         ep->peer_smp_rank, hdr.data.tag, hdr.data.size, hdr.data.seq, start);
 
             /* the 0xff tag indicates we should skip the rest of the buffer */
             if (OPAL_LIKELY((0xfe & hdr.data.tag) != 0xfe)) {
@@ -230,8 +233,13 @@ static inline bool mca_btl_sm_check_fboxes (void)
             } else if (OPAL_LIKELY(0xfe == hdr.data.tag)) {
                 /* process fragment header */
                 fifo_value_t *value = (fifo_value_t *)(ep->fbox_in.buffer + start + sizeof (hdr));
-                mca_btl_sm_hdr_t *hdr = relative2virtual(*value);
-                mca_btl_sm_poll_handle_frag (hdr, ep);
+                fprintf(stderr, "PROCESSING FRAGMENT %p %lu\n", value, *value);
+                if(hdr.data.seq == 28) {
+                fprintf(stderr, "ATTACH %d\n",getpid());
+                    //int xxx=1; while(xxx) sleep(1);
+                }
+                mca_btl_sm_hdr_t *btl_hdr = relative2virtual(*value);
+                mca_btl_sm_poll_handle_frag (btl_hdr, ep);
             }
 
             start = (start + hdr.data.size + sizeof (hdr) + MCA_BTL_SM_FBOX_ALIGNMENT_MASK) & ~MCA_BTL_SM_FBOX_ALIGNMENT_MASK;

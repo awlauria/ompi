@@ -109,6 +109,7 @@ static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *
 static inline int32_t opal_atomic_swap_32 (opal_atomic_int32_t *addr, int32_t newval)
 {
     int32_t oldval;
+    fprintf(stderr, "hello - builtins. opal_atomic_swap_32\n");
     __atomic_exchange (addr, &newval, &oldval, __ATOMIC_RELAXED);
     return oldval;
 }

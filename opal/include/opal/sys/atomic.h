@@ -66,7 +66,7 @@
 #define OPAL_C_GCC_INLINE_ASSEMBLY 0
 #endif
 
-#if OPAL_ASSEMBLY_BUILTIN == OPAL_BUILTIN_C11 && !defined(__INTEL_COMPILER)
+#if 0 //OPAL_ASSEMBLY_BUILTIN == OPAL_BUILTIN_C11 && !defined(__INTEL_COMPILER)
 
 #include "atomic_stdc.h"
 

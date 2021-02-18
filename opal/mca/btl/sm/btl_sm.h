@@ -49,7 +49,8 @@
 #include "opal/mca/shmem/base/base.h"
 
 #include "opal/class/opal_free_list.h"
-#include "opal/sys/atomic.h"
+#include "opal/sys/powerpc/atomic.h"
+//#include "opal/sys/atomic.h"
 #include "opal/mca/btl/btl.h"
 #include "opal/mca/rcache/rcache.h"
 #include "opal/mca/rcache/base/rcache_base_vma.h"

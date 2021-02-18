@@ -454,6 +454,7 @@ mca_btl_base_rdma_start (mca_btl_base_module_t *btl, struct mca_btl_base_endpoin
         } else if (!mca_btl_base_rdma_use_rdma_get (btl)) {
             send_size = size_t_min (size, btl->btl_max_send_size - sizeof (*hdr));
         } else {
+            fprintf(stderr, "using rdma??\n");
             use_rdma = true;
         }
     } else if (MCA_BTL_BASE_AM_GET == type) {
@@ -462,6 +463,7 @@ mca_btl_base_rdma_start (mca_btl_base_module_t *btl, struct mca_btl_base_endpoin
         } else if (!mca_btl_base_rdma_use_rdma_put (btl)) {
             recv_size = size_t_min (size, btl->btl_max_send_size - sizeof (mca_btl_base_rdma_response_hdr_t));
         } else {
+            fprintf(stderr, "using rdma2??\n");
             use_rdma = true;
         }
     } else {
@@ -906,16 +908,16 @@ static void mca_btl_base_am_process_atomic (mca_btl_base_module_t *btl, const mc
         abort();
     }
 
-    BTL_VERBOSE(("got active-message atomic request. hdr->context=0x%" PRIx64 ", target_address=%p, "
-                 "segment 0 size=%" PRIu64, hdr->context, target_address, desc->des_segments[0].seg_len));
+    fprintf(stderr, "got active-message atomic request. hdr->context=0x%" PRIx64 ", target_address=%p, "
+                 "segment 0 size=%" PRIu64 "\n", hdr->context, target_address, desc->des_segments[0].seg_len);
 
     switch (hdr->type) {
     case MCA_BTL_BASE_AM_ATOMIC:
-        if (4 == hdr->data.atomic.size) {
-            uint32_t tmp = (uint32_t) atomic_response;
-            mca_btl_base_am_atomic_32 (&tmp, (opal_atomic_int32_t *)(uintptr_t) hdr->target_address,
+        if (8 == hdr->data.atomic.size) {
+            mca_btl_base_am_atomic_64 ((int64_t *) hdr->target_address,
+                                       (opal_atomic_int64_t *)(uintptr_t) hdr->target_address,
                                        hdr->data.atomic.op);
-            atomic_response = tmp;
+
         } if (8 == hdr->data.atomic.size) {
             mca_btl_base_am_atomic_64 ((int64_t *) hdr->target_address,
                                        (opal_atomic_int64_t *)(uintptr_t) hdr->target_address,
