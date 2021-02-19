@@ -41,6 +41,7 @@
 #include "opal/include/opal_config.h"
 
 #include "opal/util/malloc.h"
+#include "opal/util/atomic.h"
 #include "opal/util/arch.h"
 #include "opal/util/output.h"
 #include "opal/util/show_help.h"
@@ -505,6 +506,8 @@ opal_init_util(int* pargc, char*** pargv)
     opal_malloc_init();
 
     OPAL_TIMING_ENV_NEXT(otmng, "opal_malloc_init");
+
+    opal_util_atomic_init();
 
     /* initialize the output system */
     opal_output_init();
