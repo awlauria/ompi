@@ -29,6 +29,9 @@
 #include <stdatomic.h>
 #include <stdint.h>
 #include "opal_stdint.h"
+#include <pthread.h>
+
+extern pthread_mutex_t atomic_fallback_mutex;
 
 #define OPAL_HAVE_ATOMIC_MEM_BARRIER 1
 
@@ -82,100 +85,208 @@ static inline void opal_atomic_rmb (void)
 #endif
 }
 
-#define opal_atomic_compare_exchange_strong_32(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_relaxed, memory_order_relaxed)
-#define opal_atomic_compare_exchange_strong_64(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_relaxed, memory_order_relaxed)
-#define opal_atomic_compare_exchange_strong_ptr(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_relaxed, memory_order_relaxed)
-#define opal_atomic_compare_exchange_strong_acq_32(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_acquire, memory_order_relaxed)
-#define opal_atomic_compare_exchange_strong_acq_64(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_acquire, memory_order_relaxed)
-#define opal_atomic_compare_exchange_strong_acq_ptr(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_acquire, memory_order_relaxed)
+#define OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr) 0 == (((intptr_t) addr) & 0x3)
+#define OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr) 0 == (((intptr_t) addr) & 0x7)
 
-#define opal_atomic_compare_exchange_strong_rel_32(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_release, memory_order_relaxed)
-#define opal_atomic_compare_exchange_strong_rel_64(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_release, memory_order_relaxed)
+#define OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(prefix, bits, type, mem) \
+    static inline bool opal_atomic_compare_exchange_strong ## prefix ## bits (opal_atomic_ ## type *addr, type *compare, type value) \
+    {                                                                                                                                    \
+        if(OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr)) {                                                                                       \
+            return atomic_compare_exchange_strong_explicit (addr, compare, value, mem, memory_order_relaxed);                            \
+        }                                                                                                                                \
+        else {                                                                                                                           \
+            pthread_mutex_lock(&atomic_fallback_mutex);                                                                                  \
+            if(*addr == *compare) {                                                                                                       \
+                *addr = value;                                                                                                           \
+                pthread_mutex_unlock(&atomic_fallback_mutex);                                                                            \
+                return true;                                                                                                             \
+            }                                                                                                                            \
+            else {                                                                                                                       \
+               *compare = *addr;                                                                                                         \
+            }                                                                                                                            \
+            pthread_mutex_unlock(&atomic_fallback_mutex);                                                                                \
+            return false;                                                                                                                \
+        }                                                                                                                                \
+    }                                                                                                                                    \
+
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_, 32, int32_t, memory_order_relaxed)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_, 64, int64_t, memory_order_relaxed)
+
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_acq_, 32, int32_t, memory_order_acquire)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_acq_, 64, int64_t, memory_order_acquire)
+
+
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_rel_, 32, int32_t, memory_order_release)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_rel_, 64, int64_t, memory_order_release)
+
+#define opal_atomic_compare_exchange_strong_ptr(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_relaxed, memory_order_relaxed)
+#define opal_atomic_compare_exchange_strong_acq_ptr(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_acquire, memory_order_relaxed)
 #define opal_atomic_compare_exchange_strong_rel_ptr(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_release, memory_order_relaxed)
 
 #define opal_atomic_compare_exchange_strong(addr, oldval, newval) atomic_compare_exchange_strong_explicit (addr, oldval, newval, memory_order_relaxed, memory_order_relaxed)
 #define opal_atomic_compare_exchange_strong_acq(addr, oldval, newval)  atomic_compare_exchange_strong_explicit (addr, oldval, newval, memory_order_acquire, memory_order_relaxed)
 #define opal_atomic_compare_exchange_strong_rel(addr, oldval, newval)  atomic_compare_exchange_strong_explicit (addr, oldval, newval, memory_order_release, memory_order_relaxed)
 
-#define opal_atomic_swap_32(addr, value) atomic_exchange_explicit ((_Atomic unsigned int *)addr, value, memory_order_relaxed)
-#define opal_atomic_swap_64(addr, value) atomic_exchange_explicit ((_Atomic unsigned long *)addr, value, memory_order_relaxed)
+#define OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr) 0 == (((intptr_t) addr) & 0x3)
+#define OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr) 0 == (((intptr_t) addr) & 0x7)
+
+#include<stdio.h>
+static inline int32_t opal_atomic_swap_32 (opal_atomic_int32_t *addr, int32_t value) {
+
+    if(OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr)) {
+        return atomic_exchange_explicit ((_Atomic unsigned int *)addr, value, memory_order_relaxed);
+    }
+    else {
+        pthread_mutex_lock(&atomic_fallback_mutex);
+        int32_t ret = *addr;
+        *addr = value;
+        pthread_mutex_unlock(&atomic_fallback_mutex);
+        return ret;
+    }
+}
+
+static inline int32_t opal_atomic_swap_64 (opal_atomic_int64_t *addr, int64_t value) {
+
+    if(OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr)) {
+        return atomic_exchange_explicit ((_Atomic unsigned long *)addr, value, memory_order_relaxed);
+    }
+    else {
+        pthread_mutex_lock(&atomic_fallback_mutex);
+        int64_t ret = *addr;
+        *addr = value;
+        pthread_mutex_unlock(&atomic_fallback_mutex);
+        return ret;
+    }
+}
+
 #define opal_atomic_swap_ptr(addr, value) atomic_exchange_explicit ((_Atomic unsigned long *)addr, value, memory_order_relaxed)
 
-#define OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(op, bits, type, operator)      \
+#define OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(op, bits, align, type, operator)      \
     static inline type opal_atomic_fetch_ ## op ##_## bits (opal_atomic_ ## type *addr, type value) \
-    {                                                                   \
-        return atomic_fetch_ ## op ## _explicit (addr, value, memory_order_relaxed); \
+    { \
+        if(OPAL_ATOMIC_ALIGNED_## align ## _BYTE(addr)) {                                 \
+            return atomic_fetch_ ## op ## _explicit (addr, value, memory_order_relaxed); \
+        } \
+        else { \
+            pthread_mutex_lock(&atomic_fallback_mutex);              \
+            type ret = *addr; \
+            *addr = *addr operator value; \
+            pthread_mutex_unlock(&atomic_fallback_mutex);            \
+            return ret; \
+        } \
     }                                                                   \
                                                                         \
     static inline type opal_atomic_## op ## _fetch_ ## bits (opal_atomic_ ## type *addr, type value) \
-    {                                                                   \
-        return atomic_fetch_ ## op ## _explicit (addr, value, memory_order_relaxed) operator value; \
-    }
+    {                                                        \
+        if(OPAL_ATOMIC_ALIGNED_## align ## _BYTE(addr)) {                                       \
+            return atomic_fetch_ ## op ## _explicit (addr, value, memory_order_relaxed) operator value; \
+        } \
+        else { \
+            pthread_mutex_lock(&atomic_fallback_mutex);              \
+            type ret = *addr operator value; \
+            *addr = ret; \
+            pthread_mutex_unlock(&atomic_fallback_mutex);            \
+            return ret; \
+        } \
+    }                 \
 
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(add, 32, int32_t, +)
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(add, 64, int64_t, +)
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(add, size_t, size_t, +)
 
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(sub, 32, int32_t, -)
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(sub, 64, int64_t, -)
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(sub, size_t, size_t, -)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(add, 32, FOUR, int32_t, +)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(add, 64, EIGHT, int64_t, +)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(add, size_t, EIGHT, size_t, +)
 
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(or, 32, int32_t, |)
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(or, 64, int64_t, |)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(sub, 32, FOUR, int32_t, -)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(sub, 64, EIGHT, int64_t, -)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(sub, size_t, EIGHT, size_t, -)
 
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(xor, 32, int32_t, ^)
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(xor, 64, int64_t, ^)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(or, 32, FOUR, int32_t, |)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(or, 64, EIGHT, int64_t, |)
 
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(and, 32, int32_t, &)
-OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(and, 64, int64_t, &)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(xor, 32, FOUR, int32_t, ^)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(xor, 64, EIGHT, int64_t, ^)
+
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(and, 32, FOUR, int32_t, &)
+OPAL_ATOMIC_STDC_DEFINE_FETCH_OP(and, 64, EIGHT, int64_t, &)
 
 #define opal_atomic_add(addr, value) (void) atomic_fetch_add_explicit (addr, value, memory_order_relaxed)
 
 static inline int32_t opal_atomic_fetch_min_32 (opal_atomic_int32_t *addr, int32_t value)
 {
     int32_t old = *addr;
-    do {
-        if (old <= value) {
-            break;
+    if(OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr)) {
+        do {
+            if (old <= value) {
+                break;
         }
-    } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
-
+        } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
+    }
+    else {
+        pthread_mutex_lock(&atomic_fallback_mutex);
+        if(old > value) {
+            *addr = value;
+        }
+	pthread_mutex_unlock(&atomic_fallback_mutex);
+    }
     return old;
 }
 
 static inline int32_t opal_atomic_fetch_max_32 (opal_atomic_int32_t *addr, int32_t value)
 {
     int32_t old = *addr;
-    do {
-        if (old >= value) {
-            break;
+    if(OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr)) {
+        do {
+            if (old >= value) {
+                break;
+            }
+        } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
+    }
+    else {
+        pthread_mutex_lock(&atomic_fallback_mutex);
+        if(old < value) {
+            *addr = value;
         }
-    } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
-
+        pthread_mutex_unlock(&atomic_fallback_mutex);
+    }
     return old;
 }
 
 static inline int64_t opal_atomic_fetch_min_64 (opal_atomic_int64_t *addr, int64_t value)
 {
     int64_t old = *addr;
-    do {
-        if (old <= value) {
-            break;
+    if(OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr)) {
+        do {
+            if (old <= value) {
+                break;
+            }
+        } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
+    }
+    else {
+        pthread_mutex_lock(&atomic_fallback_mutex);
+        if(old > value) {
+            *addr = value;
         }
-    } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
-
+        pthread_mutex_unlock(&atomic_fallback_mutex);
+    }
     return old;
 }
 
 static inline int64_t opal_atomic_fetch_max_64 (opal_atomic_int64_t *addr, int64_t value)
 {
     int64_t old = *addr;
-    do {
-        if (old >= value) {
-            break;
+    if(OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr)) {
+        do {
+            if (old >= value) {
+                break;
+            }
+        } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
+    }
+    else {
+        pthread_mutex_lock(&atomic_fallback_mutex);
+        if(old < value) {
+            *addr = value;
         }
-    } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
-
+        pthread_mutex_unlock(&atomic_fallback_mutex);
+    }
     return old;
 }
 
