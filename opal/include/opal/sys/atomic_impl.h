@@ -43,11 +43,18 @@
 static inline int32_t opal_atomic_fetch_min_32 (opal_atomic_int32_t *addr, int32_t value)
 {
     int32_t old = *addr;
-    do {
-        if (old <= value) {
-            break;
+    if(OPAL_LIKELY(0 == (addr % 0x3)) {
+        do {
+            if (old <= value) {
+                break;
+            }
+        } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
+    }
+    else {
+        if(old > value) {
+            *addr = value;
         }
-    } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
+    }
 
     return old;
 }
@@ -60,12 +67,18 @@ static inline int32_t opal_atomic_fetch_min_32 (opal_atomic_int32_t *addr, int32
 static inline int32_t opal_atomic_fetch_max_32 (opal_atomic_int32_t *addr, int32_t value)
 {
     int32_t old = *addr;
-    do {
-        if (old >= value) {
-            break;
+    if(OPAL_LIKELY(0 == (addr % 0x3)) {
+        do {
+            if (old >= value) {
+                break;
+            }
+        } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
+    }
+    else {
+        if(old < value) {
+            *addr = value;
         }
-    } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, value));
-
+    }
     return old;
 }
 
@@ -89,9 +102,13 @@ static inline int32_t opal_atomic_swap_32(opal_atomic_int32_t *addr,
                                           int32_t newval)
 {
     int32_t old = *addr;
-    do {
-    } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, newval));
-
+    if(OPAL_LIKELY(addr % 0x3 == 0)) {
+        do {
+        } while (!opal_atomic_compare_exchange_strong_32 (addr, &old, newval));
+    }
+    else {
+        *addr = newval;
+    }
     return old;
 }
 #endif /* OPAL_HAVE_ATOMIC_SWAP_32 */
@@ -141,11 +158,18 @@ OPAL_ATOMIC_DEFINE_CMPXCG_OP(int32_t, 32, -, sub)
 static inline int64_t opal_atomic_fetch_min_64 (opal_atomic_int64_t *addr, int64_t value)
 {
     int64_t old = *addr;
-    do {
-        if (old <= value) {
-            break;
+    if(OPAL_LIKELY(0 == (addr % 0x7) {
+        do {
+            if (old <= value) {
+                break;
+            }
+         } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
+    }
+    else {
+        if(old > value) {
+            *addr = value;
         }
-    } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
+    }
 
     return old;
 }
@@ -158,11 +182,18 @@ static inline int64_t opal_atomic_fetch_min_64 (opal_atomic_int64_t *addr, int64
 static inline int64_t opal_atomic_fetch_max_64 (opal_atomic_int64_t *addr, int64_t value)
 {
     int64_t old = *addr;
-    do {
-        if (old >= value) {
-            break;
+    if(OPAL_LIKELY(0 == (addr % 0x7) {
+        do {
+            if (old >= value) {
+                break;
+            }
+        } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
+    }
+    else {
+        if(old < value) {
+            *addr = value;
         }
-    } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, value));
+    }
 
     return old;
 }
@@ -176,9 +207,13 @@ static inline int64_t opal_atomic_swap_64(opal_atomic_int64_t *addr,
                                           int64_t newval)
 {
     int64_t old = *addr;
-    do {
-    } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, newval));
-
+    if(OPAL_LIKELY(0 == (addr % 0x7) {
+        do {
+        } while (!opal_atomic_compare_exchange_strong_64 (addr, &old, newval));
+    }
+    else {
+        *addr = newval;
+    }
     return old;
 }
 #endif /* OPAL_HAVE_ATOMIC_SWAP_64 */
