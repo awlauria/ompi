@@ -1,8 +1,8 @@
 #include "opal/util/output.h"
 #include "opal/runtime/opal.h"
 #include "atomic.h"
+#include<pthread.h>
 
-#include "opal/mca/threads/pthreads/threads_pthreads_mutex.h"
 
 pthread_mutex_t atomic_fallback_mutex;
 

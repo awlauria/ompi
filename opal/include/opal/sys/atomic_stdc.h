@@ -88,10 +88,10 @@ static inline void opal_atomic_rmb (void)
 #define OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr) 0 == (((intptr_t) addr) & 0x3)
 #define OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr) 0 == (((intptr_t) addr) & 0x7)
 
-#define OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(prefix, bits, type, mem) \
+#define OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(prefix, bits, type, align, mem) \
     static inline bool opal_atomic_compare_exchange_strong ## prefix ## bits (opal_atomic_ ## type *addr, type *compare, type value) \
     {                                                                                                                                    \
-        if(OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr)) {                                                                                       \
+        if(OPAL_ATOMIC_ALIGNED_## align ## _BYTE(addr)) {                                 \
             return atomic_compare_exchange_strong_explicit (addr, compare, value, mem, memory_order_relaxed);                            \
         }                                                                                                                                \
         else {                                                                                                                           \
@@ -109,15 +109,15 @@ static inline void opal_atomic_rmb (void)
         }                                                                                                                                \
     }                                                                                                                                    \
 
-OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_, 32, int32_t, memory_order_relaxed)
-OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_, 64, int64_t, memory_order_relaxed)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_, 32, int32_t, FOUR, memory_order_relaxed)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_, 64, int64_t, EIGHT, memory_order_relaxed)
 
-OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_acq_, 32, int32_t, memory_order_acquire)
-OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_acq_, 64, int64_t, memory_order_acquire)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_acq_, 32, int32_t, FOUR, memory_order_acquire)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_acq_, 64, int64_t, EIGHT, memory_order_acquire)
 
 
-OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_rel_, 32, int32_t, memory_order_release)
-OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_rel_, 64, int64_t, memory_order_release)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_rel_, 32, int32_t, FOUR, memory_order_release)
+OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_rel_, 64, int64_t, EIGHT, memory_order_release)
 
 #define opal_atomic_compare_exchange_strong_ptr(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_relaxed, memory_order_relaxed)
 #define opal_atomic_compare_exchange_strong_acq_ptr(addr, compare, value) atomic_compare_exchange_strong_explicit (addr, compare, value, memory_order_acquire, memory_order_relaxed)
@@ -126,9 +126,6 @@ OPAL_ATOMIC_STDC_DEFINE_STRONG_COMPARE(_rel_, 64, int64_t, memory_order_release)
 #define opal_atomic_compare_exchange_strong(addr, oldval, newval) atomic_compare_exchange_strong_explicit (addr, oldval, newval, memory_order_relaxed, memory_order_relaxed)
 #define opal_atomic_compare_exchange_strong_acq(addr, oldval, newval)  atomic_compare_exchange_strong_explicit (addr, oldval, newval, memory_order_acquire, memory_order_relaxed)
 #define opal_atomic_compare_exchange_strong_rel(addr, oldval, newval)  atomic_compare_exchange_strong_explicit (addr, oldval, newval, memory_order_release, memory_order_relaxed)
-
-#define OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr) 0 == (((intptr_t) addr) & 0x3)
-#define OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr) 0 == (((intptr_t) addr) & 0x7)
 
 #include<stdio.h>
 static inline int32_t opal_atomic_swap_32 (opal_atomic_int32_t *addr, int32_t value) {
@@ -147,7 +144,7 @@ static inline int32_t opal_atomic_swap_32 (opal_atomic_int32_t *addr, int32_t va
 
 static inline int32_t opal_atomic_swap_64 (opal_atomic_int64_t *addr, int64_t value) {
 
-    if(OPAL_ATOMIC_ALIGNED_FOUR_BYTE(addr)) {
+    if(OPAL_ATOMIC_ALIGNED_EIGHT_BYTE(addr)) {
         return atomic_exchange_explicit ((_Atomic unsigned long *)addr, value, memory_order_relaxed);
     }
     else {
