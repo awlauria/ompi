@@ -66,7 +66,7 @@
 #define OPAL_C_GCC_INLINE_ASSEMBLY 0
 #endif
 
-#if OPAL_ASSEMBLY_BUILTIN == OPAL_BUILTIN_C11 && !defined(__INTEL_COMPILER)
+#if OPAL_ASSEMBLY_BUILTIN == OPAL_BUILTIN_C11 &&!defined(__INTEL_COMPILER)
 
 #include "atomic_stdc.h"
 
@@ -164,7 +164,7 @@ enum {
  *********************************************************************/
 #if defined(DOXYGEN)
 /* don't include system-level gorp when generating doxygen files */
-#elif OPAL_ASSEMBLY_BUILTIN == OPAL_BUILTIN_GCC
+#elif OPAL_ASSEMBLY_BUILTIN == OPAL_BUILTIN_GCC || OPAL_ASSEMBLY_ARCH == OPAL_POWERPC32 || OPAL_ASSEMBLY_ARCH == OPAL_POWERPC64
 #include "opal/sys/gcc_builtin/atomic.h"
 #elif OPAL_ASSEMBLY_ARCH == OPAL_X86_64
 #include "opal/sys/x86_64/atomic.h"

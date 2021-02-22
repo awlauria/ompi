@@ -51,11 +51,28 @@ AC_DEFUN([OPAL_PROG_CC_C11_HELPER],[
     OPAL_CC_HELPER([if $CC $1 supports C11 _Thread_local], [opal_prog_cc_c11_helper__Thread_local_available],
                    [],[[static _Thread_local int  foo = 1;++foo;]])
 
+
+    OPAL_CC_HELPER([if $CC $1 has stdatomic.h], [opal_prog_cc_c11_helper_atomic_has_stdatomic_h],
+                   [[#include <stdatomic.h>]], [])
+    opal_stdatomic_hdr=""
+    if test $opal_prog_cc_c11_helper_atomic_has_stdatomic_h -eq 1; then
+        opal_stdatomic_hdr="#include<stdatomic.h>"
+    fi
+
     OPAL_CC_HELPER([if $CC $1 supports C11 atomic variables], [opal_prog_cc_c11_helper_atomic_var_available],
-                   [[#include <stdatomic.h>]], [[static atomic_long foo = 1;++foo;]])
+                   [[$opal_stdatomic_hdr]], [[static atomic_long foo = 1;++foo;]])
 
     OPAL_CC_HELPER([if $CC $1 supports C11 _Atomic keyword], [opal_prog_cc_c11_helper__Atomic_available],
-                   [[#include <stdatomic.h>]],[[static _Atomic long foo = 1;++foo;]])
+                   [[$opal_stdatomic_hdr]],[[static _Atomic long foo = 1;++foo;]])
+
+   if test $opal_prog_cc_c11_helper_atomic_var_available -eq 1; then
+       OPAL_CC_HELPER([if $CC $1 supports C11 _c11_atomic functions], [opal_prog_cc_c11_atomic_function],
+                   [[$opal_stdatomic_hdr]],[[atomic_int acnt = 0; _c11_atomic_fetch_add(&acnt, 1, 0);]])
+   elif test $opal_prog_cc_c11_helper__Atomic_available -eq 1; then
+        OPAL_CC_HELPER([if $CC $1 supports C11 _c11_atomic functions], [opal_prog_cc_c11_atomic_function],
+                   [[$opal_stdatomic_hdr]],[[_Atomic long acnt = 0; __c11_atomic_fetch_add(&acnt, 1, 0);]])
+   fi
+
 
     OPAL_CC_HELPER([if $CC $1 supports C11 _Generic keyword], [opal_prog_cc_c11_helper__Generic_available],
                    [[#define FOO(x) (_Generic (x, int: 1))]], [[static int x, y; y = FOO(x);]])
@@ -64,7 +81,7 @@ AC_DEFUN([OPAL_PROG_CC_C11_HELPER],[
                    [[#include <stdint.h>]],[[_Static_assert(sizeof(int64_t) == 8, "WTH");]])
 
     OPAL_CC_HELPER([if $CC $1 supports C11 atomic_fetch_xor_explicit], [opal_prog_cc_c11_helper_atomic_fetch_xor_explicit_available],
-                   [[#include <stdatomic.h>
+                   [[$opal_stdatomic_hdr
 #include <stdint.h>]],[[_Atomic uint32_t a; uint32_t b; atomic_fetch_xor_explicit(&a, b, memory_order_relaxed);]])
 
     AS_IF([test $opal_prog_cc_c11_helper__Thread_local_available -eq 1 && test $opal_prog_cc_c11_helper_atomic_var_available -eq 1 && test $opal_prog_cc_c11_helper_atomic_fetch_xor_explicit_available -eq 1],

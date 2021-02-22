@@ -132,7 +132,7 @@ AC_DEFUN([OPAL_ATOMIC_COMPARE_EXCHANGE_STRONG_TEST_SOURCE],[[
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <stdatomic.h>
+$opal_stdatomic_hdr
 
 typedef union {
     uint64_t fake@<:@2@:>@;
@@ -396,7 +396,7 @@ AC_DEFUN([OPAL_CHECK_C11_CSWAP_INT128], [
   # free.
   AS_IF([test $atomic_compare_exchange_result -eq 1],
         [AC_MSG_CHECKING([if C11 __int128 atomic compare-and-swap is always lock-free])
-         AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <stdatomic.h>], [_Atomic __int128_t x; if (!atomic_is_lock_free(&x)) { return 1; }])],
+         AC_RUN_IFELSE([AC_LANG_PROGRAM([$opal_stdatomic_hdr], [_Atomic __int128_t x; if (!atomic_is_lock_free(&x)) { return 1; }])],
               [AC_MSG_RESULT([yes])],
               [atomic_compare_exchange_result=0
                # If this test fails, need to reset CFLAGS/LIBS (the
