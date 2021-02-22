@@ -1262,6 +1262,7 @@ struct mca_btl_base_module_t {
     mca_btl_base_module_atomic_op64_fn_t    btl_atomic_op;
     mca_btl_base_module_atomic_fop64_fn_t   btl_atomic_fop;
     mca_btl_base_module_atomic_cswap64_fn_t btl_atomic_cswap;
+    opal_mutex_t                            btl_atomic_fallback_lock;
 
     /* new memory registration functions */
     mca_btl_base_module_register_mem_fn_t   btl_register_mem;   /**< memory registration function (NULL if not needed) */

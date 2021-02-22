@@ -757,68 +757,171 @@ static int mca_btl_base_am_rdma_progress (void) {
 }
 
 static int mca_btl_base_am_atomic_64 (int64_t *operand, opal_atomic_int64_t *addr,
-                                      mca_btl_base_atomic_op_t op)
+                                      mca_btl_base_atomic_op_t op, opal_mutex_t *lock)
 {
     int64_t result = 0;
 
-    switch (op) {
-    case MCA_BTL_ATOMIC_ADD:
-        result = opal_atomic_fetch_add_64 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_AND:
-        result = opal_atomic_fetch_and_64 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_OR:
-        result = opal_atomic_fetch_or_64 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_XOR:
-        result = opal_atomic_fetch_xor_64 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_SWAP:
-        result = opal_atomic_swap_64 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_MIN:
-        result = opal_atomic_fetch_min_64 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_MAX:
-        result = opal_atomic_fetch_max_64 (addr, *operand);
-        break;
-    default:
-        return OPAL_ERR_BAD_PARAM;
+    if(OPAL_LIKELY(0 == ((((intptr_t) addr) & 0x7)))) { 
+        switch (op) {
+        case MCA_BTL_ATOMIC_ADD:
+            result = opal_atomic_fetch_add_64 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_AND:
+            result = opal_atomic_fetch_and_64 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_OR:
+            result = opal_atomic_fetch_or_64 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_XOR:
+            result = opal_atomic_fetch_xor_64 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_SWAP:
+            result = opal_atomic_swap_64 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_MIN:
+            result = opal_atomic_fetch_min_64 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_MAX:
+            result = opal_atomic_fetch_max_64 (addr, *operand);
+            break;
+        default:
+            return OPAL_ERR_BAD_PARAM;
+        }
     }
+    else {
+        fprintf(stderr, "unaligned 64\n");
+        if(lock) {
+            OPAL_THREAD_LOCK(lock);
+        }
+        switch (op) {
+        case MCA_BTL_ATOMIC_ADD:
+            result = *addr;
+            *addr += *operand;
+            break;
+        case MCA_BTL_ATOMIC_AND:
+            result = *addr;
+            *addr &= *operand;
+            break;
+        case MCA_BTL_ATOMIC_OR:
+            result = *addr;
+            *addr |= *operand;
+            break;
+        case MCA_BTL_ATOMIC_XOR:
+            result = *addr;
+            *addr ^= *operand;
+            break;
+        case MCA_BTL_ATOMIC_SWAP:
+            result = *addr;
+            *addr  = *operand;
+            break;
+        case MCA_BTL_ATOMIC_MIN:
+            result = *addr;
+            if(result > *operand) {
+                *addr = *operand;
+            }
+            break;
+        case MCA_BTL_ATOMIC_MAX:
+            result = *addr;
+            if(result < *operand) {
+                *addr = *operand;
+            }
+            break;
+        default: {
+            if(lock) {
+                OPAL_THREAD_UNLOCK(lock);
+            }
+            return OPAL_ERR_BAD_PARAM;
+        }
+        if(lock) {
+            OPAL_THREAD_UNLOCK(lock);
+        }
+        }
+    }
+
 
     *operand = result;
     return OPAL_SUCCESS;
 }
 
-static int mca_btl_base_am_atomic_32 (int32_t *operand, opal_atomic_int32_t *addr, mca_btl_base_atomic_op_t op)
+static int mca_btl_base_am_atomic_32 (int32_t *operand, opal_atomic_int32_t *addr, mca_btl_base_atomic_op_t op, opal_mutex_t *lock)
 {
     int32_t result = 0;
 
-    switch (op) {
-    case MCA_BTL_ATOMIC_ADD:
-        result = opal_atomic_fetch_add_32 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_AND:
-        result = opal_atomic_fetch_and_32 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_OR:
-        result = opal_atomic_fetch_or_32 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_XOR:
-        result = opal_atomic_fetch_xor_32 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_SWAP:
-        result = opal_atomic_swap_32 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_MIN:
-        result = opal_atomic_fetch_min_32 (addr, *operand);
-        break;
-    case MCA_BTL_ATOMIC_MAX:
-        result = opal_atomic_fetch_max_32 (addr, *operand);
-        break;
-    default:
-        return OPAL_ERR_BAD_PARAM;
+    if(OPAL_LIKELY(0 == (((intptr_t) addr) & 0x3))) {
+        switch (op) {
+        case MCA_BTL_ATOMIC_ADD:
+            result = opal_atomic_fetch_add_32 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_AND:
+            result = opal_atomic_fetch_and_32 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_OR:
+            result = opal_atomic_fetch_or_32 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_XOR:
+            result = opal_atomic_fetch_xor_32 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_SWAP:
+            result = opal_atomic_swap_32 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_MIN:
+            result = opal_atomic_fetch_min_32 (addr, *operand);
+            break;
+        case MCA_BTL_ATOMIC_MAX:
+            result = opal_atomic_fetch_max_32 (addr, *operand);
+            break;
+        default:
+            return OPAL_ERR_BAD_PARAM;
+        }
+    }
+    else {
+        fprintf(stderr, "unaligned 32\n");
+        if(lock) {
+            OPAL_THREAD_LOCK(lock);
+        }
+        switch (op) {
+        case MCA_BTL_ATOMIC_ADD:
+            result = *addr;
+            *addr += *operand;
+            break;
+        case MCA_BTL_ATOMIC_AND:
+            result = *addr;
+            *addr &= *operand;
+            break;
+        case MCA_BTL_ATOMIC_OR:
+            result = *addr;
+            *addr |= *operand;
+            break;
+        case MCA_BTL_ATOMIC_XOR:
+            result = *addr;
+            *addr ^= *operand;
+            break;
+        case MCA_BTL_ATOMIC_SWAP:
+            result = *addr;
+            *addr  = *operand;
+            break;
+        case MCA_BTL_ATOMIC_MIN:
+            result = *addr;
+            if(result > *operand) {
+                *addr = *operand;
+            }
+            break;
+        case MCA_BTL_ATOMIC_MAX:
+            result = *addr;
+            if(result < *operand) {
+                *addr = *operand;
+            }
+            break;
+        default: {
+            if(lock) {
+               OPAL_THREAD_UNLOCK(lock);
+            }
+            return OPAL_ERR_BAD_PARAM;
+        }
+        if(lock) {
+            OPAL_THREAD_UNLOCK(lock);
+        }
+        }
     }
 
     *operand = result;
@@ -914,12 +1017,12 @@ static void mca_btl_base_am_process_atomic (mca_btl_base_module_t *btl, const mc
         if (4 == hdr->data.atomic.size) {
             uint32_t tmp = (uint32_t) atomic_response;
             mca_btl_base_am_atomic_32 (&tmp, (opal_atomic_int32_t *)(uintptr_t) hdr->target_address,
-                                       hdr->data.atomic.op);
+                                       hdr->data.atomic.op, &btl->btl_atomic_fallback_lock);
             atomic_response = tmp;
         } if (8 == hdr->data.atomic.size) {
             mca_btl_base_am_atomic_64 ((int64_t *) hdr->target_address,
                                        (opal_atomic_int64_t *)(uintptr_t) hdr->target_address,
-                                       hdr->data.atomic.op);
+                                       hdr->data.atomic.op, &btl->btl_atomic_fallback_lock);
         }
         break;
     case MCA_BTL_BASE_AM_CAS:

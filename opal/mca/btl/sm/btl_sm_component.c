@@ -307,6 +307,7 @@ static int mca_btl_sm_component_close(void)
     OBJ_DESTRUCT(&mca_btl_sm_component.lock);
     OBJ_DESTRUCT(&mca_btl_sm_component.pending_endpoints);
     OBJ_DESTRUCT(&mca_btl_sm_component.pending_fragments);
+    OBJ_DESTRUCT(&mca_btl_sm.super.btl_atomic_fallback_lock);
 
     if (MCA_BTL_SM_XPMEM == mca_btl_sm_component.single_copy_mechanism &&
         NULL != mca_btl_sm_component.my_segment) {
@@ -582,7 +583,7 @@ static mca_btl_base_module_t **mca_btl_sm_component_init (int *num_btls,
 
     /* set flag indicating btl not inited */
     mca_btl_sm.btl_inited = false;
-
+    OBJ_CONSTRUCT(&mca_btl_sm.super.btl_atomic_fallback_lock, opal_mutex_t);
     return btls;
  failed:
 #if OPAL_BTL_SM_HAVE_XPMEM

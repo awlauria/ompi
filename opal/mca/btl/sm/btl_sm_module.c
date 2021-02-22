@@ -180,10 +180,10 @@ static int sm_btl_first_time_init(mca_btl_sm_t *sm_btl, int n)
             return rc;
         }
     }
+    OBJ_CONSTRUCT(&sm_btl->super.btl_atomic_fallback_lock, opal_mutex_t);
 
     /* set flag indicating btl has been inited */
     sm_btl->btl_inited = true;
-
 #if OPAL_BTL_SM_HAVE_XPMEM
     if (MCA_BTL_SM_XPMEM == mca_btl_sm_component.single_copy_mechanism) {
         mca_btl_sm_component.vma_module = mca_rcache_base_vma_module_alloc ();

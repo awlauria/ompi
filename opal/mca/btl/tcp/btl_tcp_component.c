@@ -323,6 +323,8 @@ static int mca_btl_tcp_component_register(void)
     mca_btl_tcp_module.super.btl_rndv_eager_limit = 64*1024;
     mca_btl_tcp_module.super.btl_max_send_size = 128*1024;
     mca_btl_tcp_module.super.btl_rdma_pipeline_send_length = 128*1024;
+    OBJ_CONSTRUCT(&mca_btl_tcp_module.super.btl_atomic_fallback_lock, opal_mutex_t);
+    
     /* Some OSes have hard coded limits on how many bytes can be manipulated
      * by each writev operation.  Force a reasonable limit, to prevent overflowing
      * a signed 32-bit integer (limit comes from BSD and OS X). We remove 1k to
@@ -448,6 +450,8 @@ static int mca_btl_tcp_component_close(void)
 
     OBJ_DESTRUCT(&mca_btl_tcp_ready_frag_mutex);
     OBJ_DESTRUCT(&mca_btl_tcp_ready_frag_pending_queue);
+
+    OBJ_DESTRUCT(&mca_btl_tcp_module.super.btl_atomic_fallback_lock);
 
     if (NULL != mca_btl_tcp_component.tcp_btls) {
         free(mca_btl_tcp_component.tcp_btls);
