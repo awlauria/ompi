@@ -27,10 +27,10 @@
  * On powerpc ...
  */
 
-#define MB()  __asm__ __volatile__ ("sync" : : : "memory")
-#define RMB() __asm__ __volatile__ ("lwsync" : : : "memory")
-#define WMB() __asm__ __volatile__ ("lwsync" : : : "memory")
-#define ISYNC() __asm__ __volatile__ ("isync" : : : "memory")
+#define MB()  __sync() //__asm__ __volatile__ ("sync" : : : "memory")
+#define RMB() __lwsync() //__asm__ __volatile__ ("lwsync" : : : "memory")
+#define WMB()  __lwsync() //__asm__ __volatile__ ("lwsync" : : : "memory")
+#define ISYNC() __isync() //__asm__ __volatile__ ("isync" : : : "memory")
 
 
 /**********************************************************************
@@ -126,23 +126,7 @@ void opal_atomic_isync(void)
 
 static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *addr, int32_t *oldval, int32_t newval)
 {
-    int32_t prev;
-    bool ret;
-
-    __asm__ __volatile__ (
-                          "1: lwarx   %0, 0, %2  \n\t"
-                          "   cmpw    0, %0, %3  \n\t"
-                          "   bne-    2f         \n\t"
-                          "   stwcx.  %4, 0, %2  \n\t"
-                          "   bne-    1b         \n\t"
-                          "2:"
-                          : "=&r" (prev), "=m" (*addr)
-                          : "r" OPAL_ASM_ADDR(addr), "r" (*oldval), "r" (newval), "m" (*addr)
-                          : "cc", "memory");
-
-    ret = (prev == *oldval);
-    *oldval = prev;
-    return ret;
+    return (bool) __compare_and_swap(addr, oldval, newval);
 }
 
 /* NTH: the LL/SC support is done through macros due to issues with non-optimized builds. The reason
@@ -150,29 +134,14 @@ static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *
  * load the arguments to/from the stack. This sequence may cause the ll reservation to be cancelled. */
 #define opal_atomic_ll_32(addr, ret)                                    \
     do {                                                                \
-        opal_atomic_int32_t *_addr = (addr);                               \
-        int32_t _ret;                                                   \
-        __asm__ __volatile__ ("lwarx   %0, 0, %1  \n\t"                 \
-                              : "=&r" (_ret)                            \
-                              : "r" (_addr)                             \
-                              );                                        \
+        int32_t _ret = __lwarx((opal_atomic_int34_t *) addr);           \
+        ret = (__typeof__(ret)) _ret;                                   \
         ret = (typeof(ret)) _ret;                                       \
     } while (0)
 
 #define opal_atomic_sc_32(addr, value, ret)                             \
     do {                                                                \
-        opal_atomic_int32_t *_addr = (addr);                               \
-        int32_t _ret, _foo, _newval = (int32_t) value;                  \
-                                                                        \
-        __asm__ __volatile__ ("   stwcx.  %4, 0, %3  \n\t"              \
-                              "   li      %0,0       \n\t"              \
-                              "   bne-    1f         \n\t"              \
-                              "   ori     %0,%0,1    \n\t"              \
-                              "1:"                                      \
-                              : "=r" (_ret), "=m" (*_addr), "=r" (_foo) \
-                              : "r" (_addr), "r" (_newval)              \
-                              : "cc", "memory");                        \
-        ret = _ret;                                                     \
+        ret = __stwcx((opal_atomic_int32_t *) addr, value);            \
     } while (0)
 
 /* these two functions aren't inlined in the non-gcc case because then
@@ -221,18 +190,7 @@ static inline int32_t opal_atomic_swap_32(opal_atomic_int32_t *addr, int32_t new
 #define OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(type, instr)               \
 static inline int64_t opal_atomic_fetch_ ## type ## _64(opal_atomic_int64_t* v, int64_t val) \
 {                                                                       \
-    int64_t t, old;                                                     \
-                                                                        \
-    __asm__ __volatile__(                                               \
-                         "1:   ldarx   %1, 0, %4    \n\t"               \
-                         "     " #instr "     %0, %3, %1   \n\t"        \
-                         "     stdcx.  %0, 0, %4    \n\t"               \
-                         "     bne-    1b           \n\t"               \
-                         : "=&r" (t), "=&r" (old), "=m" (*v)            \
-                         : "r" (OPAL_ASM_VALUE64(val)), "r" OPAL_ASM_ADDR(v), "m" (*v) \
-                         : "cc");                                       \
-                                                                        \
-    return old;                                                         \
+    return __sync_ ## type ## _and_fetch(v, val);                       \
 }
 
 OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(add, add)
@@ -243,34 +201,12 @@ OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(sub, subf)
 
 static inline bool opal_atomic_compare_exchange_strong_64 (opal_atomic_int64_t *addr, int64_t *oldval, int64_t newval)
 {
-    int64_t prev;
-    bool ret;
-
-    __asm__ __volatile__ (
-                          "1: ldarx   %0, 0, %2  \n\t"
-                          "   cmpd    0, %0, %3  \n\t"
-                          "   bne-    2f         \n\t"
-                          "   stdcx.  %4, 0, %2  \n\t"
-                          "   bne-    1b         \n\t"
-                          "2:"
-                          : "=&r" (prev), "=m" (*addr)
-                          : "r" (addr), "r" (OPAL_ASM_VALUE64(*oldval)), "r" (OPAL_ASM_VALUE64(newval)), "m" (*addr)
-                          : "cc", "memory");
-
-    ret = (prev == *oldval);
-    *oldval = prev;
-    return ret;
+    return __compare_and_swaplp(addr, oldval, newval);
 }
 
 #define opal_atomic_ll_64(addr, ret)                                    \
     do {                                                                \
-        opal_atomic_int64_t *_addr = (addr);                               \
-        int64_t _ret;                                                   \
-        __asm__ __volatile__ ("ldarx   %0, 0, %1  \n\t"                 \
-                              : "=&r" (_ret)                            \
-                              : "r" (_addr)                             \
-                              );                                        \
-        ret = (typeof(ret)) _ret;                                       \
+        ret = __ldarx((opal_atomic_int64_t *) addr);                    \
     } while (0)
 
 #define opal_atomic_sc_64(addr, value, ret)                             \
@@ -317,38 +253,7 @@ static inline int64_t opal_atomic_swap_64(opal_atomic_int64_t *addr, int64_t new
 
 static inline bool opal_atomic_compare_exchange_strong_64 (opal_atomic_int64_t *addr, int64_t *oldval, int64_t newval)
 {
-    int64_t prev;
-    int ret;
-
-    /*
-     * We force oldval and newval into memory because PPC doesn't
-     * appear to have a way to do a move register with offset.  Since
-     * this is 32-bit code, a 64 bit integer will be loaded into two
-     * registers (assuming no inlining, addr will be in r3, oldval
-     * will be in r4 and r5, and newval will be r6 and r7.  We need
-     * to load the whole thing into one register.  So we have the
-     * compiler push the values into memory and load the double word
-     * into registers.  We use r4,r5 so that the main block of code
-     * is very similar to the pure 64 bit version.
-     */
-   __asm__ __volatile__ (
-                         "ld r4,%3         \n\t"
-                         "ld r5,%4        \n\t"
-                         "1: ldarx   %1, 0, %2  \n\t"
-                         "   cmpd    0, %1, r4  \n\t"
-                         "   bne-    2f         \n\t"
-                         "   stdcx.  r5, 0, %2  \n\t"
-                         "   bne-    1b         \n\t"
-                         "2:                    \n\t"
-                         "xor r5,r4,%1          \n\t"
-                         "subfic r9,r5,0        \n\t"
-                         "adde %0,r9,r5         \n\t"
-                         : "=&r" (ret), "+r" (prev)
-                         : "r"OPAL_ASM_ADDR(addr),
-                           "m"(*oldval), "m"(newval)
-                         : "r4", "r5", "r9", "cc", "memory");
-   *oldval = prev;
-   return (bool) ret;
+   return __compare_and_swaplp(addr, oldval, newval);;
 }
 
 #endif /* OPAL_GCC_INLINE_ASSEMBLY */
@@ -382,19 +287,8 @@ static inline bool opal_atomic_compare_exchange_strong_rel_64 (opal_atomic_int64
 
 #define OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(type, instr)               \
 static inline int32_t opal_atomic_fetch_ ## type ## _32(opal_atomic_int32_t* v, int val) \
-{                                                                       \
-    int32_t t, old;                                                     \
-                                                                        \
-    __asm__ __volatile__(                                               \
-                         "1:   lwarx   %1, 0, %4    \n\t"               \
-                         "     " #instr "     %0, %3, %1   \n\t"        \
-                         "     stwcx.  %0, 0, %4    \n\t"               \
-                         "     bne-    1b           \n\t"               \
-                         : "=&r" (t), "=&r" (old), "=m" (*v)            \
-                         : "r" (val), "r" OPAL_ASM_ADDR(v), "m" (*v)    \
-                         : "cc");                                       \
-                                                                        \
-    return old;                                                         \
+{                                              \
+    return __sync_ ## type ## _and_fetch(v, val);     \
 }
 
 OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(add, add)
