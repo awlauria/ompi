@@ -141,6 +141,7 @@ static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *
 #define opal_atomic_sc_32(addr, value, ret)                             \
     do {                                                                \
         ret = __stwcx((opal_atomic_int32_t *) addr, value);            \
+        MB(); \
     } while (0)
 
 /* these two functions aren't inlined in the non-gcc case because then
@@ -180,7 +181,7 @@ static inline int32_t opal_atomic_swap_32(opal_atomic_int32_t *addr, int32_t new
 #define OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(type, instr)               \
 static inline int64_t opal_atomic_fetch_ ## type ## _64(opal_atomic_int64_t* v, int64_t val) \
 {                                                                       \
-    return __sync_ ## type ## _and_fetch(v, val);                       \
+    return __sync_fetch_and_ ## type(v, val);                       \
 }
 
 OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(add, add)
@@ -191,7 +192,7 @@ OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(sub, subf)
 
 static inline bool opal_atomic_compare_exchange_strong_64 (opal_atomic_int64_t *addr, int64_t *oldval, int64_t newval)
 {
-    return __compare_and_swaplp(addr, oldval, newval);
+    return (bool) __compare_and_swaplp(addr, oldval, newval);
 }
 
 #define opal_atomic_ll_64(addr, ret)                                    \
@@ -224,7 +225,7 @@ static inline int64_t opal_atomic_swap_64(opal_atomic_int64_t *addr, int64_t new
 
 static inline bool opal_atomic_compare_exchange_strong_64 (opal_atomic_int64_t *addr, int64_t *oldval, int64_t newval)
 {
-   return __compare_and_swaplp(addr, oldval, newval);;
+   return __compare_and_swaplp(addr, oldval, newval);
 }
 
 #endif /* OPAL_GCC_INLINE_ASSEMBLY */
@@ -259,7 +260,7 @@ static inline bool opal_atomic_compare_exchange_strong_rel_64 (opal_atomic_int64
 #define OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(type, instr)               \
 static inline int32_t opal_atomic_fetch_ ## type ## _32(opal_atomic_int32_t* v, int val) \
 {                                              \
-    return __sync_ ## type ## _and_fetch(v, val);     \
+    return __sync_fetch_and_ ## type(v, val);     \
 }
 
 OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(add, add)
