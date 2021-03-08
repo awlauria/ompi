@@ -19,7 +19,7 @@
  *
  * $HEADER$
  */
-
+#include<stdio.h>
 #ifndef OPAL_SYS_ARCH_ATOMIC_H
 #define OPAL_SYS_ARCH_ATOMIC_H 1
 
@@ -27,11 +27,20 @@
  * On powerpc ...
  */
 
-#define MB()  __sync() //__asm__ __volatile__ ("sync" : : : "memory")
-#define RMB() __lwsync() //__asm__ __volatile__ ("lwsync" : : : "memory")
-#define WMB()  __lwsync() //__asm__ __volatile__ ("lwsync" : : : "memory")
-#define ISYNC() __isync() //__asm__ __volatile__ ("isync" : : : "memory")
+#if OPAL_HAVE_INLINE_ATOMIC_MEM_BARRIER
+static inline
+#endif
+void opal_atomic_mb()  {  __sync();  }
 
+#if OPAL_HAVE_INLINE_ATOMIC_MEM_BARRIER
+static inline
+#endif
+void opal_atomic_rmb() { __lwsync(); }
+
+#if OPAL_HAVE_INLINE_ATOMIC_MEM_BARRIER
+static inline
+#endif
+void  opal_atomic_wmb(){ __lwsync(); }
 
 /**********************************************************************
  *
@@ -64,69 +73,12 @@
 #define OPAL_HAVE_ATOMIC_SUB_64 1
 #endif
 
-
-/**********************************************************************
- *
- * Memory Barriers
- *
- *********************************************************************/
-#if OPAL_GCC_INLINE_ASSEMBLY
-
-static inline
-void opal_atomic_mb(void)
-{
-    MB();
-}
-
-
-static inline
-void opal_atomic_rmb(void)
-{
-    RMB();
-}
-
-
-static inline
-void opal_atomic_wmb(void)
-{
-    WMB();
-}
-
-static inline
-void opal_atomic_isync(void)
-{
-    ISYNC();
-}
-
-#endif /* end OPAL_GCC_INLINE_ASSEMBLY */
-
-/**********************************************************************
- *
- * Atomic math operations
- *
- *********************************************************************/
-#if OPAL_GCC_INLINE_ASSEMBLY
-
-#if defined(__xlC__) || defined(__IBMC__) || defined(__IBMCPP__) || defined(__ibmxl__)
-/* work-around bizzare xlc bug in which it sign-extends
-   a pointer to a 32-bit signed integer */
-#define OPAL_ASM_ADDR(a) ((uintptr_t)a)
-#else
-#define OPAL_ASM_ADDR(a) (a)
-#endif
-
-#if defined(__PGI)
-/* work-around for bug in PGI 16.5-16.7 where the compiler fails to
- * correctly emit load instructions for 64-bit operands. without this
- * it will emit lwz instead of ld to load the 64-bit operand. */
-#define OPAL_ASM_VALUE64(x) (void *)(intptr_t) (x)
-#else
-#define OPAL_ASM_VALUE64(x) x
-#endif
-
 static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *addr, int32_t *oldval, int32_t newval)
 {
+    //bool ret =
     return (bool) __compare_and_swap(addr, oldval, newval);
+    //__fence();
+   // return ret;
 }
 
 /* NTH: the LL/SC support is done through macros due to issues with non-optimized builds. The reason
@@ -136,12 +88,14 @@ static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *
     do {                                                                \
         int32_t _ret = __lwarx((opal_atomic_int34_t *) addr);           \
         ret = (__typeof__(ret)) _ret;                                   \
+       /* __fence();*/ \
     } while (0)
 
 #define opal_atomic_sc_32(addr, value, ret)                             \
     do {                                                                \
-        ret = __stwcx((opal_atomic_int32_t *) addr, value);            \
-        MB(); \
+        int32_t ret = __stwcx((opal_atomic_int32_t *) addr, value);     \
+        ret = (__typeof__(ret)) _ret;                                   \
+        /*__fence(); */\
     } while (0)
 
 /* these two functions aren't inlined in the non-gcc case because then
@@ -168,15 +122,14 @@ static inline bool opal_atomic_compare_exchange_strong_rel_32 (opal_atomic_int32
 
 static inline int32_t opal_atomic_swap_32(opal_atomic_int32_t *addr, int32_t newval)
 {
-    return __sync_val_compare_and_swap(addr, *addr, newval);
+    int32_t ret;
+    ret = __lwarx(addr);
+    __stwcx(addr, newval); 
+    return ret;
 }
-
-#endif /* OPAL_GCC_INLINE_ASSEMBLY */
 
 
 #if (OPAL_ASSEMBLY_ARCH == OPAL_POWERPC64)
-
-#if  OPAL_GCC_INLINE_ASSEMBLY
 
 #define OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(type, instr)               \
 static inline int64_t opal_atomic_fetch_ ## type ## _64(opal_atomic_int64_t* v, int64_t val) \
@@ -192,7 +145,7 @@ OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_64(sub, subf)
 
 static inline bool opal_atomic_compare_exchange_strong_64 (opal_atomic_int64_t *addr, int64_t *oldval, int64_t newval)
 {
-    return (bool) __compare_and_swaplp(addr, oldval, newval);
+   return (bool) __compare_and_swaplp(addr, oldval, newval);
 }
 
 #define opal_atomic_ll_64(addr, ret)                                    \
@@ -203,16 +156,18 @@ static inline bool opal_atomic_compare_exchange_strong_64 (opal_atomic_int64_t *
 
 #define opal_atomic_sc_64(addr, value, ret)                             \
     do {                                                                \
-       ret = __stdcx((opal_atomic_int64_t *) addr, value);             \
-       MB();       \
+       int64_t _ret = __stdcx((opal_atomic_int64_t *) addr, value);     \
+       ret = (__typeof__(ret)) _ret;                                   \
    } while (0)
 
 static inline int64_t opal_atomic_swap_64(opal_atomic_int64_t *addr, int64_t newval)
 {
-   return __sync_val_compare_and_swap(addr, *addr, newval);
+    int64_t ret;
+    do {
+      ret = __ldarx(addr);
+    } while(1 != __stdcx(addr, newval));
+    return ret;
 }
-
-#endif /* OPAL_GCC_INLINE_ASSEMBLY */
 
 #elif (OPAL_ASSEMBLY_ARCH == OPAL_POWERPC32) && OPAL_ASM_SUPPORT_64BIT
 
@@ -221,18 +176,7 @@ static inline int64_t opal_atomic_swap_64(opal_atomic_int64_t *addr, int64_t new
 #define ll_high(x)      *(((unsigned int*)&(x))+1)
 #endif
 
-#if  OPAL_GCC_INLINE_ASSEMBLY
-
-static inline bool opal_atomic_compare_exchange_strong_64 (opal_atomic_int64_t *addr, int64_t *oldval, int64_t newval)
-{
-   return __compare_and_swaplp(addr, oldval, newval);
-}
-
-#endif /* OPAL_GCC_INLINE_ASSEMBLY */
-
 #endif /* OPAL_ASM_SUPPORT_64BIT */
-
-#if OPAL_GCC_INLINE_ASSEMBLY
 
 /* these two functions aren't inlined in the non-gcc case because then
    there would be two function calls (since neither cmpset_64 nor
@@ -268,7 +212,5 @@ OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(and, and)
 OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(or, or)
 OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(xor, xor)
 OPAL_ATOMIC_POWERPC_DEFINE_ATOMIC_32(sub, subf)
-
-#endif /* OPAL_GCC_INLINE_ASSEMBLY */
 
 #endif /* ! OPAL_SYS_ARCH_ATOMIC_H */
