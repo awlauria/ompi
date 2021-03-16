@@ -75,10 +75,7 @@ void  opal_atomic_wmb(){ __lwsync(); }
 
 static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *addr, int32_t *oldval, int32_t newval)
 {
-    //bool ret =
     return (bool) __compare_and_swap(addr, oldval, newval);
-    //__fence();
-   // return ret;
 }
 
 /* NTH: the LL/SC support is done through macros due to issues with non-optimized builds. The reason
@@ -88,14 +85,12 @@ static inline bool opal_atomic_compare_exchange_strong_32 (opal_atomic_int32_t *
     do {                                                                \
         int32_t _ret = __lwarx((opal_atomic_int34_t *) addr);           \
         ret = (__typeof__(ret)) _ret;                                   \
-       /* __fence();*/ \
     } while (0)
 
 #define opal_atomic_sc_32(addr, value, ret)                             \
     do {                                                                \
         int32_t ret = __stwcx((opal_atomic_int32_t *) addr, value);     \
         ret = (__typeof__(ret)) _ret;                                   \
-        /*__fence(); */\
     } while (0)
 
 /* these two functions aren't inlined in the non-gcc case because then
