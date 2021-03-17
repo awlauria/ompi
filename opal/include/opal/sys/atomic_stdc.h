@@ -26,9 +26,14 @@
 #if !defined(OPAL_ATOMIC_STDC_H)
 #define OPAL_ATOMIC_STDC_H
 
+#if OPAL_ASSEMBLY_ARCH == OPAL_POWERPC32 || OPAL_ASSEMBLY_ARCH == OPAL_POWERPC64
+#include "opal/sys/powerpc/atomic.h"
+#endif
+
 #include <stdatomic.h>
 #include <stdint.h>
 #include "opal_stdint.h"
+
 
 #define OPAL_HAVE_ATOMIC_MEM_BARRIER 1
 
