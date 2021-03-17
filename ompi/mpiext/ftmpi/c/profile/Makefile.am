@@ -14,9 +14,9 @@
 # In this directory, we definately need it to be 1.
 AM_CPPFLAGS = -DOMPI_BUILD_MPI_PROFILING=1
 
-noinst_LTLIBRARIES = libpmpiext_ftmpi_c.la
+noinst_LTLIBRARIES = libpmpiext_ftmpi_c_pmpi.la
 
-nodist_libpmpiext_ftmpi_c_la_SOURCES = \
+nodist_libpmpiext_ftmpi_c_pmpi_la_SOURCES = \
     pcomm_revoke.c \
     pcomm_is_revoked.c \
     pcomm_shrink.c \
@@ -28,7 +28,7 @@ nodist_libpmpiext_ftmpi_c_la_SOURCES = \
 #
 # Sym link in the sources from the real MPI directory
 #
-$(nodist_libpmpiext_ftmpi_c_la_SOURCES):
+$(nodist_libpmpiext_ftmpi_c_pmpi_la_SOURCES):
 	$(OMPI_V_LN_S) if test ! -r $@ ; then \
 		pname=`echo $@ | cut -b '2-'` ; \
 		$(LN_S) $(top_srcdir)/ompi/mpiext/ftmpi/c/$$pname $@ ; \
@@ -37,7 +37,7 @@ $(nodist_libpmpiext_ftmpi_c_la_SOURCES):
 
 # These files were created by targets above
 
-MAINTAINERCLEANFILES = $(nodist_libpmpiext_ftmpi_c_la_SOURCES)
+MAINTAINERCLEANFILES = $(nodist_libpmpiext_ftmpi_c_pmpi_la_SOURCES)
 
 # Don't want these targets in here
 
