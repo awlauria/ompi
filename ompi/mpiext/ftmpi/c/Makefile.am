@@ -31,8 +31,6 @@ libmpiext_ftmpi_c_la_SOURCES = \
     comm_failure_get_acked.c \
     comm_agree.c \
     comm_iagree.c
-libmpiext_ftmpi_c_la_LIBADD = \
-    profile/libpmpiext_ftmpi_c.la
 
 dist_ompidata_DATA = help-mpi-ft.txt
 
