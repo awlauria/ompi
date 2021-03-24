@@ -365,55 +365,51 @@ static inline int ompi_osc_rdma_gacc_contig (ompi_osc_rdma_sync_t *sync, const v
 
     OSC_RDMA_VERBOSE(MCA_BASE_VERBOSE_TRACE, "using get-op-put to execute accumulate with count %d", target_count);
 
-    if (&ompi_mpi_op_replace.op != op || OMPI_OSC_RDMA_TYPE_GET_ACC == request->type) {
-        ptr = malloc (len);
-        if (OPAL_UNLIKELY(NULL == ptr)) {
-            OSC_RDMA_VERBOSE(MCA_BASE_VERBOSE_WARN, "could not allocate a temporary buffer for accumulate");
-            return OMPI_ERR_OUT_OF_RESOURCE;
-        }
-
-        /* set up the request */
-        request->to_free = ptr;
-
-        ret = ompi_osc_get_data_blocking (module, peer->data_btl_index, peer->data_endpoint,
-                                          target_address, target_handle, ptr, len);
-        if (OPAL_UNLIKELY(OMPI_SUCCESS != ret)) {
-            return ret;
-        }
-
-        if (OMPI_OSC_RDMA_TYPE_GET_ACC == request->type) {
-            if (NULL == result) {
-                /* result buffer is not necessarily contiguous. use the opal datatype engine to
-                 * copy the data over in this case */
-                struct iovec iov = {.iov_base = ptr, len};
-                uint32_t iov_count = 1;
-                size_t size = request->len;
-
-                opal_convertor_unpack (result_convertor, &iov, &iov_count, &size);
-            } else {
-                /* copy contiguous data to the result buffer */
-                ompi_datatype_sndrcv (ptr, len, MPI_BYTE, result, result_count, result_datatype);
-            }
-        }
-
-        if (&ompi_mpi_op_replace.op == op) {
-            return ompi_osc_rdma_put_contig (sync, peer, target_address, target_handle, (void *) source, len, request);
-        }
-
-        if (&ompi_mpi_op_no_op.op != op) {
-            /* NTH: need to cast away const for the source buffer. the buffer will not be modified by this call */
-            ompi_op_reduce (op, (void *) source, ptr, source_count, source_datatype);
-
-            return ompi_osc_rdma_put_contig (sync, peer, target_address, target_handle, ptr, len, request);
-        }
-
-        /* nothing more to do for this request */
-        ompi_osc_rdma_request_complete (request, MPI_SUCCESS);
-
-        return OMPI_SUCCESS;
+    ptr = malloc (len);
+    if (OPAL_UNLIKELY(NULL == ptr)) {
+        OSC_RDMA_VERBOSE(MCA_BASE_VERBOSE_WARN, "could not allocate a temporary buffer for accumulate");
+        return OMPI_ERR_OUT_OF_RESOURCE;
     }
 
-    return ompi_osc_rdma_put_contig (sync, peer, target_address, target_handle, (void *) source, len, request);
+    /* set up the request */
+    request->to_free = ptr;
+
+    ret = ompi_osc_get_data_blocking (module, peer->data_btl_index, peer->data_endpoint,
+                                          target_address, target_handle, ptr, len);
+    if (OPAL_UNLIKELY(OMPI_SUCCESS != ret)) {
+        return ret;
+    }
+
+    if (OMPI_OSC_RDMA_TYPE_GET_ACC == request->type) {
+        if (NULL == result) {
+            /* result buffer is not necessarily contiguous. use the opal datatype engine to
+             * copy the data over in this case */
+            struct iovec iov = {.iov_base = ptr, len};
+            uint32_t iov_count = 1;
+            size_t size = request->len;
+
+            opal_convertor_unpack (result_convertor, &iov, &iov_count, &size);
+        } else {
+            /* copy contiguous data to the result buffer */
+            ompi_datatype_sndrcv (ptr, len, MPI_BYTE, result, result_count, result_datatype);
+        }
+    }
+
+    if (&ompi_mpi_op_replace.op == op) {
+        return ompi_osc_rdma_put_contig (sync, peer, target_address, target_handle, (void *) source, len, request);
+    }
+
+    if (&ompi_mpi_op_no_op.op != op) {
+        /* NTH: need to cast away const for the source buffer. the buffer will not be modified by this call */
+        ompi_op_reduce (op, (void *) source, ptr, source_count, source_datatype);
+
+        return ompi_osc_rdma_put_contig (sync, peer, target_address, target_handle, ptr, len, request);
+    }
+
+    /* nothing more to do for this request */
+    ompi_osc_rdma_request_complete (request, MPI_SUCCESS);
+
+    return OMPI_SUCCESS;
 }
 
 static void ompi_osc_rdma_gacc_master_cleanup (ompi_osc_rdma_request_t *request)
