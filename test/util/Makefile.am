@@ -51,8 +51,6 @@ TESTS = \
 #ompi_numtostr_DEPENDENCIES = $(ompi_numtostr_LDADD)
 
 #opal_error_SOURCES = opal_error.c
-#opal_error_LDADD = \
-#        $(top_builddir)/orte/libopen-rte.la \
 #opal_error_DEPENDENCIES = $(opal_error_LDADD)
 
 #opal_if_SOURCES = opal_if.c

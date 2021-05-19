@@ -7,8 +7,6 @@
 
 #define _GNU_SOURCE
 
-#include "orte_config.h"
-
 #include "opal/runtime/opal.h"
 
 #include <stdio.h>

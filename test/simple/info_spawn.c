@@ -1,4 +1,3 @@
-#include "orte_config.h"
 
 #include "opal/runtime/opal.h"
 
