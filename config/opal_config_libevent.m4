@@ -70,6 +70,23 @@ AC_DEFUN([OPAL_CONFIG_LIBEVENT], [
     AS_IF([test "$external_libevent_happy" = "0" -a "$internal_libevent_happy" = "0"],
           [AC_MSG_ERROR([Could not find viable libevent build.])])
 
+    AS_IF([test "$external_libevent_happy" = "1"],
+        [AS_IF([test -n "$with_libevent"],
+               [
+                 OPAL_CHECK_LFLAGS(libevent_core, $with_libevent/lib/pkgconfig)
+                 OPAL_CHECK_LFLAGS(libevent_pthreads, $with_libevent/lib/pkgconfig)
+               ],
+               [
+                 OPAL_CHECK_LFLAGS(libevent_core)
+                 OPAL_CHECK_LFLAGS(libevent_pthreads)
+               ]
+         )],
+        [
+          OPAL_CHECK_LFLAGS(libevent_core, $OMPI_TOP_SRCDIR/3rd-party/libevent_directory)
+          OPAL_CHECK_LFLAGS(libevent_pthreads, $OMPI_TOP_SRCDIR/3rd-party/libevent_directory)
+        ]
+    )
+
     # this will work even if there is no libevent package included,
     # because libevent_tarball and libevent_directory will evaluate to
     # an empty string.  These are relative to the 3rd-party/
