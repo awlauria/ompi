@@ -70,6 +70,14 @@ AC_DEFUN([OPAL_CONFIG_HWLOC], [
     AS_IF([test "$external_hwloc_happy" = "0" -a "$internal_hwloc_happy" = "0"],
           [AC_MSG_ERROR([Could not find viable hwloc build.])])
 
+    AS_IF([test "$external_hwloc_happy" = "1"],
+        [AS_IF([test -n "$with_hwloc"],
+               [OPAL_CHECK_LFLAGS(hwloc, $with_hwloc/lib/pkgconfig)],
+               [OPAL_CHECK_LFLAGS(hwloc)]
+         )],
+        [OPAL_CHECK_LFLAGS(hwloc, $OMPI_TOP_SRCDIR/3rd-party/hwloc_directory)]
+    )
+
     # this will work even if there is no hwloc package included,
     # because hwloc_tarball and hwloc_directory will evaluate to an
     # empty string.  These are relative to the 3rd-party/ directory.

@@ -449,6 +449,11 @@ AC_DEFUN([OPAL_SETUP_WRAPPER_FINAL],[
        AC_SUBST([OMPI_WRAPPER_EXTRA_LIBS])
        AC_MSG_RESULT([$OMPI_WRAPPER_EXTRA_LIBS])
 
+       AC_MSG_CHECKING([for extra OMPI depencency libs])
+       AC_MSG_RESULT([$OMPI_DEPS_LFLAGS])
+
+       OMPI_WRAPPER_EXTRA_LIBS="$OMPI_WRAPPER_EXTRA_LIBS $OMPI_DEPS_LFLAGS"
+
       # language binding support.  C++ is a bit different, as the
       # compiler should work even if there is no MPI C++ bindings
       # support.  However, we do want it to fail if there is no C++
