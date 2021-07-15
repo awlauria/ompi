@@ -131,10 +131,10 @@ AC_DEFUN([OPAL_CONFIG_PMIX], [
 
    AS_IF([test "$external_pmix_happy" = "1"],
          [AS_IF([test -n "$with_pmix"],
-               [OPAL_CHECK_LFLAGS(pmix, $with_pmix/lib/pkgconfig, $libevent_core_OMPI_PC_DIR, $hwloc_OMPI_PC_DIR)],
-               [OPAL_CHECK_LFLAGS(pmix, "", $libevent_core_OMPI_PC_DIR, $hwloc_OMPI_PC_DIR)]
+               [OPAL_CHECK_LFLAGS(pmix, $with_pmix/lib/pkgconfig)],
+               [OPAL_CHECK_LFLAGS(pmix)]
          )],
-        [OPAL_CHECK_LFLAGS(pmix, $OMPI_TOP_SRCDIR/3rd-party/openpmix/maint, $libevent_core_OMPI_PC_DIR, $hwloc_OMPI_PC_DIR)]
+        [OPAL_CHECK_LFLAGS(pmix, $OMPI_TOP_SRCDIR/3rd-party/openpmix/maint)]
     )
 
     AC_DEFINE_UNQUOTED([OPAL_USING_INTERNAL_PMIX],

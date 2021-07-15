@@ -10,31 +10,39 @@ dnl $HEADER$
 dnl
 
 AC_DEFUN([OPAL_CHECK_LFLAGS], [
-         AC_MSG_CHECKING([for pc file for])
-         AC_MSG_RESULT([$1])
+        
+        AC_MSG_NOTICE([Parsing pc file for $1])
 
-	 num_paths=$#
-         save_name=$1
-         cmd="pkg-config"
-         $1_OMPI_PC_DIR=""
-         if test $num_paths -gt 1; then
-            $1_OMPI_PC_DIR=$2
-            args=m4_shift($@)
-            for i in $(echo $args | sed "s/,/ /g"); do
-               cmd=" ${cmd} --with-path $i"
-            done
-         fi
+        ompi_pc_libs=""
 
-         cmd="${cmd} --libs-only-l $save_name"
-         AC_MSG_CHECKING([pkg-config command for $save_name])
-         AC_MSG_RESULT([$cmd])
-
-         TMP=$($cmd)
-         AS_IF([test -z "$TMP"],
-               [AC_MSG_ERROR([Could not find viable $save_name.pc])],
-         [
-           AC_MSG_CHECKING([pkg-config result for $save_name])
-           AC_MSG_RESULT([$TMP])])
-           OMPI_DEPS_LFLAGS="$OMPI_DEPS_LFLAGS $TMP"
-         ]
-)
+        # No directory passed in, must be installed on the
+        # machine. Check where pkg-config would look
+        AS_IF([test -n "$2"],
+           [ompi_pc_libs=$(grep "Libs:" $2/$1.pc)],
+           [
+             m4_foreach(ompi_pc_path, [/usr/lib/pkgconfig, /usr/share/pkgconfig, /usr/local/lib/pkgconfig, /usr/local/share/pkgconfig, /usr/lib64/pkgconfig],
+              [
+               if test -f ompi_pc_path/$1.pc; then
+                 AC_MSG_NOTICE([Found config file ompi_pc_path/$1.pc])
+                 ompi_pc_libs=$(grep "Libs:" ompi_pc_path/$1.pc)
+                 if test -z "$ompi_pc_libs"; then
+                   break
+                 fi
+               fi
+              ])
+          ]
+        )
+        AS_IF([test -n "$ompi_pc_libs"],
+              [
+                AC_MSG_NOTICE([Found libs $ompi_pc_libs])
+                for pc_lib in $(echo $ompi_pc_libs); do
+                    AC_MSG_NOTICE([Checking $pc_lib])
+                    if $GREP -q "\-l" <<< "$pc_lib"; then
+                      AC_MSG_NOTICE([Appending $pc_lib to OMPI_DEPS_LFLAGS])
+                      OMPI_DEPS_LFLAGS="$OMPI_DEPS_LFLAGS $pc_lib"
+                    fi
+                done
+              ],
+              [AC_MSG_ERROR([Could not find viable $1.pc])]
+        )
+])
