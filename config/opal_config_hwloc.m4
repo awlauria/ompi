@@ -70,7 +70,7 @@ AC_DEFUN([OPAL_CONFIG_HWLOC], [
     AS_IF([test "$external_hwloc_happy" = "0" -a "$internal_hwloc_happy" = "0"],
           [AC_MSG_ERROR([Could not find viable hwloc build.])])
 
-    AS_IF([test "$external_hwloc_happy" = "1"],
+    AS_IF([test "$opal_hwloc_mode" = "external"],
         [AS_IF([test -n "$with_hwloc"],
                [OPAL_CHECK_LFLAGS(hwloc, $with_hwloc/lib/pkgconfig)],
                [OPAL_CHECK_LFLAGS(hwloc)]

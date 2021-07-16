@@ -9,6 +9,34 @@ dnl
 dnl $HEADER$
 dnl
 
+
+dnl OPAL_CHECK_PKG_CONFIG
+dnl Check for availability of pkg-config and store the result.
+dnl If it is not available, store any passed in libs from the
+dnl --with-extra-libs configure option, or the known defaults.
+dnl
+dnl If it is available, allow configure to check for .pc files
+dnl from OPAL_CHECK_LFLAGS.
+AC_DEFUN([OPAL_CHECK_PKG_CONFIG], [
+  AS_IF([test -z "$OPAL_HAS_PKG_CONFIG"],
+        [
+          AC_MSG_CHECKING([If pkg-config is available])
+          which pkg-config > /dev/null 2>&1
+          AS_IF([test "$?" -eq "0"],
+                [
+                  AC_MSG_RESULT([yes])
+                  OPAL_HAS_PKG_CONFIG="yes"
+                ],
+                [
+                  AC_MSG_RESULT([no])
+                  OPAL_HAS_PKG_CONFIG="no"
+                  OPAL_FLAGS_APPEND_UNIQ([OMPI_DEPS_LFLAGS], [$OPAL_EXTRA_LIBS])
+                ]
+          )
+        ]
+  )
+])
+
 dnl OPAL_CHECK_LFLAGS
 dnl Get the -l flags using pkg-config on the passed in .pc file, and
 dnl append them to OMPI_DEPS_LFLAGS.
@@ -22,47 +50,58 @@ dnl                      These search will be appended and set in the env variab
 dnl                      PKG_CONFIG_PATH to tell pkg-config where to locate the .pc
 dnl                      file from argument 1, and its dependencies.
 dnl
-dnl                    
-dnl
 AC_DEFUN([OPAL_CHECK_LFLAGS], [
 
-         AC_MSG_INFO([for pc file for $1])
+  OPAL_CHECK_PKG_CONFIG
+  AS_IF([test "$OPAL_HAS_PKG_CONFIG" = "yes"],
+        [
+          AC_MSG_NOTICE([for pc file for $1])
+          OPAL_VAR_SCOPE_PUSH([opal_pkg_config_name opal_pkg_config_env_to_set opal_pkg_config_args opal_pkg_config_cmd opal_pkg_config_result])
+          opal_pkg_config_name=$1
+          opal_pkg_config_env_to_set=""
 
-         num_paths=$#
-         save_name=$1
-         env_to_set=""
+          AS_LITERAL_WORD_IF([$1], [], [m4_fatal([Non-literal argument $1])], [])
+          $1_OMPI_PC_DIR=""
 
-         AS_LITERAL_WORD_IF([$1], [], m4_fatal([Non-literal argument $1])])
-         $1_OMPI_PC_DIR=""
+          # Tell pkg-config where to find the .pc file from argument 1
+          # as well as any/all dependencies.
+          # The following block will append the path
+          # to those .pc files into the pkg-config command.
+          # num_paths > 1 implies there is at least one dependent .pc file
+          # to append.
+          AS_IF([test $# -gt 1],
+                [
+                  $1_OMPI_PC_DIR=$2
 
-         # Tell pkg-config where to find the .pc file from argument 1
-         # as well as any/all dependencies.
-         # The following block will append the path
-         # to those .pc files into the pkg-config command.
-         # num_paths > 1 implies there is at least one dependent .pc file
-         # to append.
-         if test $num_paths -gt 1; then
-            $1_OMPI_PC_DIR=$2
+                  # Shift the arguments by one to get to the actual paths.
+                  opal_pkg_config_args=m4_shift($@)
 
-            # Shift the arguments by one to get to the actual paths.
-            args=m4_shift($@)
+                  # Iterate over the comma seperated arguments, and replace the ','
+                  for i in $(echo $opal_pkg_config_args | sed "s/,/ /g"); do
+                    opal_pkg_config_env_to_set="$i:${opal_pkg_config_env_to_set}"
+                  done
+                ]
+          )
 
-            # Iterate over the comma seperated arguments, and replace the ','
-            for i in $(echo $args | sed "s/,/ /g"); do
-               env_to_set="${env_to_set}:$i"
-            done
-         fi
+          opal_pkg_config_cmd="env PKG_CONFIG_PATH=$opal_pkg_config_env_to_set pkg-config --libs $opal_pkg_config_name"
+          OPAL_LOG_MSG([pkg-config cmd for $opal_pkg_config_name: $opal_pkg_config_cmd])
 
-         cmd="PKG_CONFIG_PATH=${env_to_set} pkg-config $save_name"
-         AC_MSG_CHECKING([pkg-config command for $save_name])
-         AC_MSG_RESULT([$cmd])
+          opal_pkg_config_result=$($opal_pkg_config_cmd)
+          AS_IF([test -z "$opal_pkg_config_result"],
+                [
+                  AC_MSG_ERROR([Could not find viable $opal_pkg_config_name.pc])
+                ],
+                [
+                  # Strip -levent as we don't want it. We only want -levent_core/-levent_pthreads.
+                  # See https://github.com/open-mpi/ompi/pull/8792
+                  opal_pkg_config_result=$(echo $opal_pkg_config_result | sed "s/\\-levent\b//g");
 
-         pkg_config_result=$($cmd)
-         AS_IF([test -z "$pkg_config_result"],
-               [AC_MSG_ERROR([Could not find viable $save_name.pc])],
-         [
-           AC_MSG_CHECKING([pkg-config result for $save_name])
-           AC_MSG_RESULT([$pkg_config_result])])
-           OMPI_DEPS_LFLAGS="$OMPI_DEPS_LFLAGS $pkg_config_result"
-         ]
-)
+                  AC_MSG_NOTICE([pkg-config result $opal_pkg_config_result])
+                  OPAL_FLAGS_APPEND_UNIQ([OMPI_DEPS_LFLAGS], [$opal_pkg_config_result])
+                ]
+          )
+          OPAL_VAR_SCOPE_POP
+        ],
+        []
+  )
+])
